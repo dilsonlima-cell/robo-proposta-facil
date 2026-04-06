@@ -23,7 +23,16 @@ const Index = () => {
         body: data,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Try to parse error body for custom message
+        let errorMsg = "Tente novamente.";
+        try {
+          const errorBody = typeof error === 'object' && error.context ? await error.context.json() : null;
+          if (errorBody?.error) errorMsg = errorBody.error;
+        } catch {}
+        throw new Error(errorMsg);
+      }
+      if (!result?.proposal) throw new Error("Resposta inválida. Tente novamente.");
       setProposal(result.proposal);
     } catch (err: any) {
       console.error(err);

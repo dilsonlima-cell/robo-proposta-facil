@@ -127,7 +127,19 @@ Observações: ${observacoes || "Nenhuma"}`;
       throw new Error("Erro ao gerar proposta com IA");
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    if (!responseText) {
+      throw new Error("Resposta vazia da IA. Tente novamente.");
+    }
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseErr) {
+      console.error("Failed to parse AI response:", responseText.substring(0, 500));
+      throw new Error("Erro ao processar resposta da IA. Tente novamente.");
+    }
+
     const proposal = data.choices?.[0]?.message?.content || "Não foi possível gerar a proposta.";
 
     return new Response(JSON.stringify({ proposal }), {
