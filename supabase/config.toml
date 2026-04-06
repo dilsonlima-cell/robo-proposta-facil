@@ -1,0 +1,3 @@
+project_id = "zwsshbquppuiuuipulez"
+[functions.generate-proposal]
+verify_jwt = false

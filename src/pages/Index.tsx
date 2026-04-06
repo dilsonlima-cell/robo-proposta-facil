@@ -1,16 +1,46 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import ProposalForm, { FormData } from "@/components/ProposalForm";
+import ProposalResult from "@/components/ProposalResult";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const [proposal, setProposal] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleGenerate = async (data: FormData) => {
+    if (!data.tipoAplicacao || !data.producao || !data.peso || !data.dimensao || !data.automacao || !data.ambiente || !data.sistemaAtual) {
+      toast({ title: "Campos obrigatórios", description: "Preencha todos os campos antes de gerar a proposta.", variant: "destructive" });
+      return;
+    }
+
+    setIsLoading(true);
+    setProposal("");
+
+    try {
+      const { data: result, error } = await supabase.functions.invoke("generate-proposal", {
+        body: data,
+      });
+
+      if (error) throw error;
+      setProposal(result.proposal);
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: "Erro ao gerar proposta", description: err.message || "Tente novamente.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background font-body">
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <ProposalForm onGenerate={handleGenerate} isLoading={isLoading} />
+        {proposal && <ProposalResult content={proposal} />}
+      </div>
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
