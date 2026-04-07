@@ -98,3 +98,69 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Proposal HTML Styles */
+.proposal-content .proposal-title {
+  @apply text-2xl font-heading font-bold text-foreground mb-2;
+}
+
+.proposal-content .proposal-subtitle {
+  @apply text-lg font-heading font-semibold text-foreground mt-6 mb-3 border-l-4 border-primary pl-3;
+}
+
+.proposal-content .proposal-text {
+  @apply text-foreground/80 leading-relaxed mb-3 text-sm;
+}
+
+.proposal-content .proposal-list {
+  @apply ml-6 mb-4 space-y-1 text-sm text-foreground/80;
+}
+
+.proposal-content .proposal-list li {
+  @apply leading-relaxed;
+}
+
+.proposal-content .proposal-section {
+  @apply mb-6;
+}
+
+.proposal-content .image-block-wrapper {
+  @apply my-4;
+}
+
+.proposal-content .image-placeholder {
+  @apply flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors text-muted-foreground text-sm;
+}
+
+.proposal-content .image-placeholder-icon {
+  @apply text-3xl;
+}
+
+/* Inline Editing Styles */
+.proposal-editing [contenteditable="true"] p,
+.proposal-editing [contenteditable="true"] h1,
+.proposal-editing [contenteditable="true"] h2,
+.proposal-editing [contenteditable="true"] h3,
+.proposal-editing [contenteditable="true"] li {
+  @apply border border-transparent rounded px-1 transition-all;
+}
+
+.proposal-editing p:hover,
+.proposal-editing h1:hover,
+.proposal-editing h2:hover,
+.proposal-editing h3:hover,
+.proposal-editing li:hover {
+  border-color: hsl(var(--primary));
+  background-color: hsl(var(--primary) / 0.05);
+  cursor: text;
+}
+
+.proposal-editing p:focus,
+.proposal-editing h1:focus,
+.proposal-editing h2:focus,
+.proposal-editing h3:focus,
+.proposal-editing li:focus {
+  @apply outline-none ring-2 ring-primary/30;
+  border-color: hsl(var(--ring));
+  background-color: hsl(var(--primary) / 0.08);
+}
