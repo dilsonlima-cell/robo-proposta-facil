@@ -10,10 +10,14 @@ const Index = () => {
   const { toast } = useToast();
 
   const handleGenerate = async (data: FormData) => {
-    if (!data.tipoAplicacao || !data.producao || !data.peso || !data.dimensao || !data.automacao || !data.ambiente || !data.sistemaAtual) {
+    if (!data.tipoAplicacao || !data.producao || !data.peso || !data.dimensoes || !data.automacao || !data.ambiente || !data.processoAtual) {
       toast({ title: "Campos obrigatórios", description: "Preencha todos os campos antes de gerar a proposta.", variant: "destructive" });
       return;
     }
+
+    // Generate new proposal ID
+    const newId = "prop_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem("current_proposal_id", newId);
 
     setIsLoading(true);
     setProposal("");
@@ -24,7 +28,6 @@ const Index = () => {
       });
 
       if (error) {
-        // Try to parse error body for custom message
         let errorMsg = "Tente novamente.";
         try {
           const errorBody = typeof error === 'object' && error.context ? await error.context.json() : null;
@@ -44,7 +47,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background font-body">
-      <div className="max-w-3xl mx-auto px-4 py-10">
+      <div className="max-w-4xl mx-auto px-4 py-10">
         <ProposalForm onGenerate={handleGenerate} isLoading={isLoading} />
         {proposal && <ProposalResult content={proposal} />}
       </div>
