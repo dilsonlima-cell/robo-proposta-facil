@@ -10,11 +10,13 @@ import { Loader2, FileText } from "lucide-react";
 export interface FormData {
   tipoAplicacao: string;
   producao: string;
+  peca: string;
   peso: string;
-  dimensao: string;
-  automacao: string;
+  dimensoes: string;
   ambiente: string;
-  sistemaAtual: string;
+  automacao: string;
+  processoAtual: string;
+  objetivo: string;
   observacoes: string;
 }
 
@@ -27,11 +29,13 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
   const [form, setForm] = useState<FormData>({
     tipoAplicacao: "",
     producao: "",
+    peca: "",
     peso: "",
-    dimensao: "",
-    automacao: "",
+    dimensoes: "",
     ambiente: "",
-    sistemaAtual: "",
+    automacao: "",
+    processoAtual: "",
+    objetivo: "",
     observacoes: "",
   });
 
@@ -72,6 +76,10 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
                   <SelectItem value="Pintura">Pintura</SelectItem>
                   <SelectItem value="Manipulação">Manipulação</SelectItem>
                   <SelectItem value="Montagem">Montagem</SelectItem>
+                  <SelectItem value="Soldagem">Soldagem</SelectItem>
+                  <SelectItem value="Embalagem">Embalagem</SelectItem>
+                  <SelectItem value="Inspeção">Inspeção</SelectItem>
+                  <SelectItem value="Alimentação de máquina">Alimentação de máquina</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -86,8 +94,17 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
               />
             </div>
 
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-foreground font-medium">Descrição da Peça</Label>
+              <Input
+                placeholder="Ex: Caixa de papelão 400x300x200mm com 12 unidades"
+                value={form.peca}
+                onChange={(e) => setForm({ ...form, peca: e.target.value })}
+              />
+            </div>
+
             <div className="space-y-2">
-              <Label className="text-foreground font-medium">Peso da Peça</Label>
+              <Label className="text-foreground font-medium">Peso da Peça (kg)</Label>
               <Input
                 type="number"
                 placeholder="kg"
@@ -97,8 +114,8 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-foreground font-medium">Dimensão da Peça</Label>
-              <Select value={form.dimensao} onValueChange={(v) => setForm({ ...form, dimensao: v })}>
+              <Label className="text-foreground font-medium">Dimensões da Peça</Label>
+              <Select value={form.dimensoes} onValueChange={(v) => setForm({ ...form, dimensoes: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Pequena (até 300mm)">Pequena (até 300mm)</SelectItem>
@@ -127,19 +144,31 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
                   <SelectItem value="Industrial normal">Industrial normal</SelectItem>
                   <SelectItem value="Agressivo (poeira, umidade, químico)">Agressivo (poeira, umidade, químico)</SelectItem>
                   <SelectItem value="Alimentício">Alimentício</SelectItem>
+                  <SelectItem value="Cleanroom">Cleanroom</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-foreground font-medium">Sistema Atual</Label>
-              <Select value={form.sistemaAtual} onValueChange={(v) => setForm({ ...form, sistemaAtual: v })}>
+              <Label className="text-foreground font-medium">Processo Atual</Label>
+              <Select value={form.processoAtual} onValueChange={(v) => setForm({ ...form, processoAtual: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="Manual">Manual</SelectItem>
+                  <SelectItem value="Semi-automático existente">Semi-automático existente</SelectItem>
+                  <SelectItem value="Automático (retrofit)">Automático (retrofit)</SelectItem>
                   <SelectItem value="Não existe">Não existe</SelectItem>
-                  <SelectItem value="Existe">Existe</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-foreground font-medium">Objetivo do Projeto</Label>
+              <Input
+                placeholder="Ex: Aumentar produtividade, reduzir custos, melhorar qualidade..."
+                value={form.objetivo}
+                onChange={(e) => setForm({ ...form, objetivo: e.target.value })}
+              />
             </div>
           </div>
 
