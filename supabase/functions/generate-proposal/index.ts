@@ -5,16 +5,96 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Dynamic agent selection based on mini escopo keywords
+function identifyAgents(miniEscopo: string): string {
+  const text = miniEscopo.toLowerCase();
+  const agents: string[] = [];
+
+  const agentRules: { keywords: string[]; agent: string; expertise: string }[] = [
+    {
+      keywords: ["molde", "injeção", "injetora", "plástico", "cavidade", "matriz de injeção", "core", "canal quente", "ventilação de molde", "ejeção"],
+      agent: "Agente Especialista em Moldes para Plásticos",
+      expertise: "Projeto e fabricação de moldes de injeção plástica, incluindo análise reológica, canais de refrigeração, sistemas de ejeção, materiais de molde, estimativa de cavidades e ciclo de injeção."
+    },
+    {
+      keywords: ["estampo", "corte", "dobra", "chapa", "prensa", "punção", "progressivo", "transferência", "repuxo", "embutimento", "shear", "estampagem"],
+      agent: "Agente Especialista em Estampos (Corte, Dobra, Repuxo)",
+      expertise: "Projeto de estampos progressivos, transfer e tandem, cálculo de força de corte/dobra/repuxo, seleção de prensas, materiais de ferramental, folgas e tolerâncias."
+    },
+    {
+      keywords: ["robô", "célula", "celula", "robotizada", "automatizado", "carga e descarga", "paletização", "despaletização", "palletização", "solda robotizada", "pintura robotizada", "manipulação", "assembly", "pick and place", "end-of-arm", "eoat"],
+      agent: "Agente Especialista em Automação e Robótica Industrial",
+      expertise: "Projeto de células robotizadas, seleção de robôs industriais, EOAT (garras/ferramentas), programação offline, simulação de ciclo, integração com periféricos, sistemas de visão, segurança NR-12."
+    },
+    {
+      keywords: ["máquina-ferramenta", "máquina ferramenta", "fresar", "tornear", "usinar", "usinagem", "cnc", "fuso", "torreta", "mandril", "retificar", "brocar", "centro de usinagem", "torno cnc"],
+      agent: "Agente Especialista em Máquinas-Ferramenta CNC",
+      expertise: "Seleção e especificação de centros de usinagem, tornos CNC, retificadoras, parâmetros de corte, ferramental, fixação, programação CNC, capacidade de processo."
+    },
+    {
+      keywords: ["pintura", "cabine", "spray", "pó", "eletrostática", "curtidor", "polimerização", "e-coat", "tratamento superficial", "jateamento"],
+      agent: "Agente Especialista em Sistemas de Pintura Industrial",
+      expertise: "Projeto de linhas de pintura (líquida, pó, e-coat), cabines, fornos de cura, pré-tratamento, recuperação de pó, controle de espessura, parâmetros de aplicação."
+    },
+    {
+      keywords: ["transporte", "esteira", "transportador", "rolo", "corrente", "pneumático", "cilindro", "válvula", "vácuo", "garra", "movimentação", "armazenagem", "agv", "amr"],
+      agent: "Agente Especialista em Sistemas de Movimentação e Armazenagem",
+      expertise: "Projeto de sistemas de transporte (esteiras, roletes, correntes), AGVs/AMRs, armazéns automatizados, sistemas pneumáticos, dimensionamento de atuadores."
+    },
+    {
+      keywords: ["caldeira", "reator", "tanque", "vaso de pressão", "trocador", "bomba", "instrumentação", "processo químico", "misturador", "destilação"],
+      agent: "Agente Especialista em Sistemas de Processo Industrial",
+      expertise: "Projeto de sistemas de processo (reatores, trocadores de calor, tanques), instrumentação, controle de processo, P&ID, dimensionamento de equipamentos."
+    },
+    {
+      keywords: ["manutenção", "preventiva", "preditiva", "vibração", "termografia", "lubrificação", "inspeção", "monitoramento", "falha", "confiabilidade", "mtbf", "mttr"],
+      agent: "Agente Especialista em Manutenção Industrial",
+      expertise: "Planos de manutenção (preventiva, preditiva, corretiva), análise de confiabilidade, FMEA, RCM, monitoramento de condição, gestão de sobressalentes."
+    },
+    {
+      keywords: ["qualidade", "controle de qualidade", "inspeção", "medição", "tolerância", "cpk", "ppk", "cmm", "visão artificial", "laser", "calibração", "ensaio", "metrologia"],
+      agent: "Agente Especialista em Controle de Qualidade",
+      expertise: "Sistemas de inspeção (visão, CMM, laser), planos de controle, SPC/CEP, MSA, capabilidade de processo, APQP/PPAP, gestão de não conformidades."
+    },
+    {
+      keywords: ["custo", "proposta", "comercial", "negociação", "orçamento", "fornecimento", "contratação", "investimento", "retorno", "payback", "roi"],
+      agent: "Agente Especialista em Custos, Proposta Técnica e Comercial",
+      expertise: "Estimativa de custos (CAPEX/OPEX), análise de viabilidade econômica, ROI, payback, estruturação de propostas, negociação técnica."
+    },
+    {
+      keywords: ["segurança", "nr-12", "nr12", "intertravamento", "barreira", "scanner", "e-stop", "enclausuramento", "risco", "análise de risco", "fmea de segurança", "iso 12100"],
+      agent: "Agente Especialista em Segurança de Máquinas e Processos",
+      expertise: "Análise de risco (NR-12, ISO 12100), projeto de sistemas de segurança, enclausuramento, intertravamentos, categorias de segurança, validação."
+    },
+  ];
+
+  for (const rule of agentRules) {
+    if (rule.keywords.some(kw => text.includes(kw))) {
+      agents.push(`${rule.agent}: ${rule.expertise}`);
+    }
+  }
+
+  if (agents.length === 0) {
+    agents.push("Agente Especialista em Engenharia Industrial Geral: Análise multidisciplinar de sistemas industriais, cobrindo processo, automação, qualidade, manutenção, segurança e gestão técnico-econômica.");
+  }
+
+  return agents.join("\n\n");
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { tipoAplicacao, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes } = await req.json();
+    const { miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `Você é um agente especializado em engenharia industrial, engenharia de produção, automação, processos, qualidade, manutenção, segurança e gestão técnico-econômica de sistemas industriais.
+    const selectedAgents = identifyAgents(miniEscopo || "");
+
+    const systemPrompt = `Você é um sistema de coordenação de agentes especializados em engenharia industrial. Com base no mini escopo fornecido, os seguintes agentes foram acionados:
+
+${selectedAgents}
 
 Você atua como:
 - ENGENHEIRO CONSULTIVO – analisa problemas sob múltiplas perspectivas e recomenda soluções tecnicamente sólidas.
@@ -58,7 +138,7 @@ PROCESSAMENTO INTERNO AUTOMÁTICO:
 2. VERIFICAÇÃO DE CARGA ÚTIL:
    - Carga total = peso + 0.5kg (ferramental)
    - Carga mínima = Carga total x 1.1 (10% margem)
-   - Selecionar robô com capacidade adequada
+   - Selecionar equipamento com capacidade adequada
 
 3. DIMENSIONAMENTO DO ALCANCE:
    - Alcance necessário = Distância entre pontos x 1.2 (20% margem)
@@ -74,18 +154,16 @@ REGRAS DE ENGENHARIA:
 - 10 a 50kg → robô médio (R$180k–350k)
 - Acima de 50kg → robô grande (R$350k–800k)
 - Integração: 30% a 60%
-- Produção > 600 peças/hora → alta performance ou múltiplos robôs
+- Produção > 600 peças/hora → alta performance ou múltiplos robôs/equipamentos
 - Agressivo → proteção industrial avançada
 - Alimentício → materiais inox/sanitário
 
-COMPONENTES OBRIGATÓRIOS: Robô industrial, Garra/EOAT, Sistema de alimentação, Sensores, CLP + painel elétrico, Sistema de segurança NR-12
-
-DETALHAMENTO DE SERVIÇOS (incluir automaticamente):
+DETALHAMENTO DE SERVIÇOS (incluir automaticamente conforme aplicável ao tipo de projeto):
 1. Engenharia Mecânica (layout, projeto estrutural, ferramentais, simulações)
 2. Engenharia Elétrica (quadros, diagramas, cabos, sensores)
 3. Montagens Mecânicas (estrutural, periféricos, alinhamento)
 4. Montagens Elétricas (cabiação, conexões, testes)
-5. Engenharia de Software (programação robô, HMI, CLP)
+5. Engenharia de Software (programação, HMI, CLP)
 6. Montagens Internas (testes pré-instalação, debugging)
 7. Instalação no Cliente (transporte, posicionamento, integração)
 8. Comissionamento (testes, calibração, treinamento, liberação)
@@ -110,6 +188,7 @@ ESTRUTURA OBRIGATÓRIA DA PROPOSTA (15 SEÇÕES):
 
 <h1 class="proposal-title">PROPOSTA TÉCNICA E COMERCIAL</h1>
 <h2 class="proposal-subtitle">DATA: {data atual}</h2>
+<p class="proposal-text"><strong>Agentes Especializados Acionados:</strong> [listar os agentes identificados]</p>
 
 1. APRESENTAÇÃO - Introdução profissional ao cliente
 
@@ -117,17 +196,17 @@ ESTRUTURA OBRIGATÓRIA DA PROPOSTA (15 SEÇÕES):
    <<IMAGEM:FLUXO_PROCESSO>>
 
 3. ALTERNATIVAS DE SOLUÇÃO - Apresentar 3 alternativas com riscos, prazos e custos estimados:
-   - Opção Básica (Conservadora): menor risco, tecnologia comprovada, maior custo relativo
+   - Opção Básica (Conservadora): menor risco, tecnologia comprovada
    - Opção Intermediária: equilíbrio entre risco, prazo, custo e inovação
-   - Opção Otimizada (Premium): máxima performance, menor custo operacional, tecnologia avançada
+   - Opção Otimizada (Premium): máxima performance, tecnologia avançada
    Para cada: descrição, riscos associados, prazo estimado, custo estimado, nível de automação, serviços incluídos
-   <<IMAGEM:LAYOUT_CELULA>>
+   <<IMAGEM:LAYOUT_SOLUCAO>>
 
-4. SOLUÇÃO RECOMENDADA E JUSTIFICATIVA - Qual alternativa é recomendada e POR QUÊ, com base na hierarquia de decisão técnica-econômica. Justificar tecnicamente e economicamente.
+4. SOLUÇÃO RECOMENDADA E JUSTIFICATIVA - Qual alternativa é recomendada e POR QUÊ, com base na hierarquia de decisão técnica-econômica.
 
-5. ESCOPO TÉCNICO - Descrição detalhada da solução recomendada. O QUÊ será entregue: especificações de equipamentos, dimensões, materiais, parâmetros de processo, arquitetura de automação, layout conceitual.
+5. ESCOPO TÉCNICO - Descrição detalhada da solução recomendada. Especificações, dimensões, materiais, parâmetros, arquitetura, layout conceitual.
 
-6. ETAPAS DE EXECUÇÃO - Sequência de passos para implementar. Para cada etapa: descrição, responsável, duração estimada, dependências.
+6. ETAPAS DE EXECUÇÃO - Sequência de passos. Para cada etapa: descrição, responsável, duração estimada, dependências.
 
 7. RECURSOS NECESSÁRIOS:
    - Pessoal: habilidades, quantidade, tempo
@@ -135,7 +214,7 @@ ESTRUTURA OBRIGATÓRIA DA PROPOSTA (15 SEÇÕES):
    - Equipamentos: máquinas, ferramentas, dispositivos, softwares
    - Serviços de terceiros: consultoria, instalação, calibração, transporte
 
-8. ESTIMATIVA DE CUSTOS - Decompor ao máximo. Declarar margem de incerteza e o que está incluído/excluído:
+8. ESTIMATIVA DE CUSTOS - Decompor ao máximo. Declarar margem de incerteza:
    - Material, Fabricação/Usinagem, Engenharia, Montagem/Instalação, Comissionamento/Start-up
    - Treinamento, Documentação, Contingência (x%), Impostos (estimar), Frete/Transporte
    - TOTAL ESTIMADO com margem percentual
@@ -145,20 +224,19 @@ ESTRUTURA OBRIGATÓRIA DA PROPOSTA (15 SEÇÕES):
    - Montagem/Instalação, Comissionamento/Testes, Start-up/Estabilização
    - PRAZO TOTAL ESTIMADO com margem
 
-10. GESTÃO DE RISCOS - Identificar riscos técnicos, operacionais e financeiros:
-    Para cada: descrição, probabilidade (baixa/média/alta), impacto (baixo/médio/alto), mitigação proposta
+10. GESTÃO DE RISCOS - Riscos técnicos, operacionais e financeiros:
+    Para cada: descrição, probabilidade, impacto, mitigação proposta
 
-11. CRITÉRIOS DE ACEITAÇÃO / SUCESSO - Métricas mensuráveis e objetivas:
-    Exemplos: OEE ≥ 75%, tempo de ciclo ≤ X s, Cpk ≥ 1.33, refugo ≤ 2%, disponibilidade ≥ 95%, payback ≤ 2 anos
+11. CRITÉRIOS DE ACEITAÇÃO / SUCESSO - Métricas mensuráveis e objetivas
 
-12. DADOS A CONFIRMAR (VALIDAÇÕES NECESSÁRIAS) - Lista explícita de informações que PRECISAM ser validadas em campo, com fornecedores ou cliente antes de prosseguir.
+12. DADOS A CONFIRMAR (VALIDAÇÕES NECESSÁRIAS) - Informações que PRECISAM ser validadas antes de prosseguir.
 
 13. VISÃO CONCEITUAL DA SOLUÇÃO
     <<IMAGEM:CONCEITO_SOLUCAO>>
 
-14. FECHAMENTO COMERCIAL - Recomendar melhor opção com base nos cálculos, reforçar ganhos de produtividade, destacar qualidade dos serviços, convidar para reunião técnica.
+14. FECHAMENTO COMERCIAL - Recomendar melhor opção, reforçar ganhos, convidar para reunião técnica.
 
-15. RECOMENDAÇÕES FINAIS - Próximos passos concretos e acionáveis. Quem deve fazer o quê, em que prazo.
+15. RECOMENDAÇÕES FINAIS - Próximos passos concretos e acionáveis.
 
 REGRAS FINAIS:
 - Linguagem técnica + comercial equilibrada
@@ -171,10 +249,11 @@ REGRAS FINAIS:
 - Declarar incertezas explícitas e dados faltantes
 - Segurança como condição de projeto, não acessório
 - Priorizar solução mais simples que atende todos os requisitos
+- Utilizar as regras específicas dos agentes especializados acionados
 - Responda em português brasileiro`;
 
     const userPrompt = `DADOS DO PROJETO:
-Tipo de aplicação: ${tipoAplicacao}
+Mini Escopo: ${miniEscopo}
 Produção desejada: ${producao} peças/hora
 Descrição da peça: ${peca || "Não informada"}
 Peso da peça: ${peso} kg
