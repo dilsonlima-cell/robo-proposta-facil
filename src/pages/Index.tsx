@@ -10,12 +10,11 @@ const Index = () => {
   const { toast } = useToast();
 
   const handleGenerate = async (data: FormData) => {
-    if (!data.tipoAplicacao || !data.producao || !data.peso || !data.dimensoes || !data.automacao || !data.ambiente || !data.processoAtual) {
+    if (!data.miniEscopo || !data.producao || !data.peso || !data.dimensoes || !data.automacao || !data.ambiente || !data.processoAtual) {
       toast({ title: "Campos obrigatórios", description: "Preencha todos os campos antes de gerar a proposta.", variant: "destructive" });
       return;
     }
 
-    // Generate new proposal ID
     const newId = "prop_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
     localStorage.setItem("current_proposal_id", newId);
 

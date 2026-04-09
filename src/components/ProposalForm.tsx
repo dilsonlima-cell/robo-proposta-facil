@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, FileText } from "lucide-react";
 
 export interface FormData {
-  tipoAplicacao: string;
+  miniEscopo: string;
   producao: string;
   peca: string;
   peso: string;
@@ -27,7 +27,7 @@ interface ProposalFormProps {
 
 const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
   const [form, setForm] = useState<FormData>({
-    tipoAplicacao: "",
+    miniEscopo: "",
     producao: "",
     peca: "",
     peso: "",
@@ -56,34 +56,30 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
               Gerador de Proposta Técnica
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-1">
-              Célula Robotizada
+              Plataforma de Engenharia Comercial
             </CardDescription>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
-          Preencha os dados abaixo para gerar uma proposta técnica automatizada
+          Preencha os dados abaixo para gerar uma proposta técnica automatizada com seleção dinâmica de agentes especializados
         </p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-2">
-              <Label className="text-foreground font-medium">Tipo de Aplicação</Label>
-              <Select value={form.tipoAplicacao} onValueChange={(v) => setForm({ ...form, tipoAplicacao: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Paletização">Paletização</SelectItem>
-                  <SelectItem value="Pintura">Pintura</SelectItem>
-                  <SelectItem value="Manipulação">Manipulação</SelectItem>
-                  <SelectItem value="Montagem">Montagem</SelectItem>
-                  <SelectItem value="Soldagem">Soldagem</SelectItem>
-                  <SelectItem value="Embalagem">Embalagem</SelectItem>
-                  <SelectItem value="Inspeção">Inspeção</SelectItem>
-                  <SelectItem value="Alimentação de máquina">Alimentação de máquina</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label className="text-foreground font-medium">Mini Escopo do Projeto</Label>
+            <Textarea
+              placeholder="Descreva o equipamento, sistema, máquina ou serviço desejado. Ex: Célula robotizada para soldagem MIG de chassis automotivo, Molde de injeção para carcaça plástica, Estampo progressivo para corte e dobra de chapa..."
+              value={form.miniEscopo}
+              onChange={(e) => setForm({ ...form, miniEscopo: e.target.value })}
+              className="min-h-[100px]"
+            />
+            <p className="text-xs text-muted-foreground">
+              O sistema identificará automaticamente os agentes especializados necessários com base na sua descrição.
+            </p>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Produção Desejada</Label>
               <Input
@@ -94,15 +90,6 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
               />
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label className="text-foreground font-medium">Descrição da Peça</Label>
-              <Input
-                placeholder="Ex: Caixa de papelão 400x300x200mm com 12 unidades"
-                value={form.peca}
-                onChange={(e) => setForm({ ...form, peca: e.target.value })}
-              />
-            </div>
-
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Peso da Peça (kg)</Label>
               <Input
@@ -110,6 +97,15 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
                 placeholder="kg"
                 value={form.peso}
                 onChange={(e) => setForm({ ...form, peso: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-foreground font-medium">Descrição da Peça</Label>
+              <Input
+                placeholder="Ex: Caixa de papelão 400x300x200mm com 12 unidades"
+                value={form.peca}
+                onChange={(e) => setForm({ ...form, peca: e.target.value })}
               />
             </div>
 
