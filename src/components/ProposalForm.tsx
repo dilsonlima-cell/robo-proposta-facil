@@ -8,6 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, FileText } from "lucide-react";
 
 export interface FormData {
+  clientName: string;
+  projectTitle: string;
+  initialObjective: string;
+  proposalVersion: string;
   miniEscopo: string;
   producao: string;
   peca: string;
@@ -27,6 +31,10 @@ interface ProposalFormProps {
 
 const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
   const [form, setForm] = useState<FormData>({
+    clientName: "",
+    projectTitle: "",
+    initialObjective: "",
+    proposalVersion: "",
     miniEscopo: "",
     producao: "",
     peca: "",
@@ -44,6 +52,8 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
     onGenerate(form);
   };
 
+  const showProposalVersion = form.initialObjective === "Gerar Proposta Técnica e Comercial";
+
   return (
     <Card className="border-border/60 shadow-lg">
       <CardHeader className="pb-4">
@@ -53,30 +63,94 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
           </div>
           <div>
             <CardTitle className="font-heading text-2xl text-foreground">
-              Gerador de Proposta Técnica
+              Plataforma de Engenharia Comercial
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-1">
-              Plataforma de Engenharia Comercial
+              Geração Automatizada de Documentos Técnicos e Comerciais
             </CardDescription>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
-          Preencha os dados abaixo para gerar uma proposta técnica automatizada com seleção dinâmica de agentes especializados
+          Preencha os dados abaixo. O sistema identificará automaticamente os agentes especializados e gerará o documento com profundidade proporcional à versão selecionada.
         </p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Section A: Dados Gerais */}
+          <div className="space-y-1 mb-2">
+            <h3 className="text-sm font-heading font-semibold text-foreground uppercase tracking-wide">A. Dados Gerais</h3>
+            <div className="h-0.5 bg-primary/20 rounded" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">Nome do Cliente *</Label>
+              <Input
+                placeholder="Ex: Maguinistic Indústria"
+                value={form.clientName}
+                onChange={(e) => setForm({ ...form, clientName: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">Título do Projeto *</Label>
+              <Input
+                placeholder="Ex: Célula Robotizada para Soldagem MIG"
+                value={form.projectTitle}
+                onChange={(e) => setForm({ ...form, projectTitle: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label className="text-foreground font-medium">Objetivo Inicial *</Label>
+              <Select value={form.initialObjective} onValueChange={(v) => setForm({ ...form, initialObjective: v, proposalVersion: v === "Gerar Escopo Técnico" ? "" : form.proposalVersion })}>
+                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Gerar Escopo Técnico">Gerar Escopo Técnico</SelectItem>
+                  <SelectItem value="Gerar Proposta Técnica e Comercial">Gerar Proposta Técnica e Comercial</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Escopo Técnico: documento preliminar a partir de uma ideia. Proposta: documento completo com custos e prazos.
+              </p>
+            </div>
+
+            {showProposalVersion && (
+              <div className="space-y-2">
+                <Label className="text-foreground font-medium">Versão da Proposta *</Label>
+                <Select value={form.proposalVersion} onValueChange={(v) => setForm({ ...form, proposalVersion: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Basica">Básica — Análise superficial, escopo resumido</SelectItem>
+                    <SelectItem value="Normal">Normal — Análise detalhada, escopo completo</SelectItem>
+                    <SelectItem value="Completa">Completa — Análise profunda, máximo detalhamento</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+
           <div className="space-y-2">
-            <Label className="text-foreground font-medium">Mini Escopo do Projeto</Label>
+            <Label className="text-foreground font-medium">Descrição da Aplicação / Mini Escopo *</Label>
             <Textarea
               placeholder="Descreva o equipamento, sistema, máquina ou serviço desejado. Ex: Célula robotizada para soldagem MIG de chassis automotivo, Molde de injeção para carcaça plástica, Estampo progressivo para corte e dobra de chapa..."
               value={form.miniEscopo}
               onChange={(e) => setForm({ ...form, miniEscopo: e.target.value })}
               className="min-h-[100px]"
+              required
             />
             <p className="text-xs text-muted-foreground">
-              O sistema identificará automaticamente os agentes especializados necessários com base na sua descrição.
+              O sistema identificará automaticamente os agentes especializados com base na sua descrição.
             </p>
+          </div>
+
+          {/* Section B: Parâmetros Técnicos */}
+          <div className="space-y-1 mb-2 mt-6">
+            <h3 className="text-sm font-heading font-semibold text-foreground uppercase tracking-wide">B. Parâmetros Técnicos</h3>
+            <div className="h-0.5 bg-primary/20 rounded" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -182,10 +256,10 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Gerando proposta...
+                Gerando documento...
               </>
             ) : (
-              "Gerar Proposta"
+              form.initialObjective === "Gerar Escopo Técnico" ? "Gerar Escopo Técnico" : "Gerar Proposta Técnica e Comercial"
             )}
           </Button>
         </form>
