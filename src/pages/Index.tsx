@@ -10,8 +10,13 @@ const Index = () => {
   const { toast } = useToast();
 
   const handleGenerate = async (data: FormData) => {
-    if (!data.miniEscopo || !data.producao || !data.peso || !data.dimensoes || !data.automacao || !data.ambiente || !data.processoAtual) {
-      toast({ title: "Campos obrigatórios", description: "Preencha todos os campos antes de gerar a proposta.", variant: "destructive" });
+    if (!data.miniEscopo || !data.clientName || !data.projectTitle || !data.initialObjective) {
+      toast({ title: "Campos obrigatórios", description: "Preencha Nome do Cliente, Título do Projeto, Objetivo Inicial e Mini Escopo.", variant: "destructive" });
+      return;
+    }
+
+    if (data.initialObjective === "Gerar Proposta Técnica e Comercial" && !data.proposalVersion) {
+      toast({ title: "Versão obrigatória", description: "Selecione a versão da proposta (Básica, Normal ou Completa).", variant: "destructive" });
       return;
     }
 
@@ -38,7 +43,7 @@ const Index = () => {
       setProposal(result.proposal);
     } catch (err: any) {
       console.error(err);
-      toast({ title: "Erro ao gerar proposta", description: err.message || "Tente novamente.", variant: "destructive" });
+      toast({ title: "Erro ao gerar documento", description: err.message || "Tente novamente.", variant: "destructive" });
     } finally {
       setIsLoading(false);
     }

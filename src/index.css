@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
     --background: 215 25% 97%;
@@ -87,7 +83,7 @@ All colors MUST be HSL.
   }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @layer base {
   * {
@@ -99,41 +95,311 @@ All colors MUST be HSL.
   }
 }
 
-/* Proposal HTML Styles */
+/* ========================================
+   EXECUTIVE PROPOSAL DESIGN SYSTEM
+   ======================================== */
+
+/* Cover Page */
+.proposal-content .proposal-cover {
+  background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 40%, #3B82F6 100%);
+  color: white;
+  padding: 60px 40px;
+  border-radius: 8px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.proposal-content .proposal-cover::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.proposal-content .cover-title {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.proposal-content .cover-subtitle {
+  font-size: 20px;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-bottom: 32px;
+  border-bottom: 2px solid rgba(255,255,255,0.3);
+  padding-bottom: 16px;
+  position: relative;
+}
+
+.proposal-content .cover-meta {
+  font-size: 13px;
+  opacity: 0.85;
+  line-height: 1.8;
+  position: relative;
+}
+
+.proposal-content .cover-meta p {
+  color: white !important;
+  margin-bottom: 2px;
+}
+
+/* Titles & Headings */
 .proposal-content .proposal-title {
-  @apply text-2xl font-heading font-bold text-foreground mb-2;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1E40AF;
+  margin-bottom: 8px;
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
 }
 
 .proposal-content .proposal-subtitle {
-  @apply text-lg font-heading font-semibold text-foreground mt-6 mb-3 border-l-4 border-primary pl-3;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1F2937;
+  margin-top: 28px;
+  margin-bottom: 12px;
+  border-left: 4px solid #1E40AF;
+  padding-left: 12px;
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
 }
 
+.proposal-content h3.proposal-subtitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #4B5563;
+  margin-top: 20px;
+  margin-bottom: 8px;
+  border-left: 3px solid #3B82F6;
+}
+
+/* Body Text */
 .proposal-content .proposal-text {
-  @apply text-foreground/80 leading-relaxed mb-3 text-sm;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  text-align: justify;
 }
 
+/* Lists */
 .proposal-content .proposal-list {
-  @apply ml-6 mb-4 space-y-1 text-sm text-foreground/80;
+  margin-left: 24px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #374151;
 }
 
 .proposal-content .proposal-list li {
-  @apply leading-relaxed;
+  line-height: 1.7;
+  margin-bottom: 4px;
 }
 
+/* Sections */
 .proposal-content .proposal-section {
-  @apply mb-6;
+  margin-bottom: 24px;
+  padding-bottom: 8px;
 }
 
+/* Highlight Boxes */
+.proposal-content .highlight-box {
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  border-left: 4px solid;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.proposal-content .highlight-recommendation {
+  background-color: #F0FDF4;
+  border-color: #10B981;
+}
+
+.proposal-content .highlight-risk {
+  background-color: #FEF2F2;
+  border-color: #EF4444;
+}
+
+.proposal-content .highlight-info {
+  background-color: #EFF6FF;
+  border-color: #3B82F6;
+}
+
+.proposal-content .highlight-warning {
+  background-color: #FFFBEB;
+  border-color: #F59E0B;
+}
+
+.proposal-content .highlight-box p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #1F2937;
+}
+
+.proposal-content .highlight-box strong {
+  font-weight: 600;
+}
+
+/* Technical Cards */
+.proposal-content .technical-card {
+  background: #F9FAFB;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+}
+
+.proposal-content .technical-card h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1E40AF;
+  margin-bottom: 8px;
+}
+
+.proposal-content .technical-card p {
+  font-size: 12px;
+  color: #4B5563;
+  line-height: 1.6;
+}
+
+/* Grid Layouts */
+.proposal-content .grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.proposal-content .grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+@media (max-width: 768px) {
+  .proposal-content .grid-2,
+  .proposal-content .grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Executive Tables */
+.proposal-content .proposal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  font-size: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #E5E7EB;
+}
+
+.proposal-content .proposal-table thead {
+  background: #1E40AF;
+  color: white;
+}
+
+.proposal-content .proposal-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.proposal-content .proposal-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #E5E7EB;
+  color: #374151;
+}
+
+.proposal-content .proposal-table tbody tr:nth-child(even) {
+  background: #F8FAFC;
+}
+
+.proposal-content .proposal-table tbody tr:hover {
+  background: #EFF6FF;
+}
+
+/* Cost Summary */
+.proposal-content .cost-summary {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 2px solid #3B82F6;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.proposal-content .cost-summary p {
+  font-size: 14px;
+  color: #1E40AF;
+  font-weight: 600;
+}
+
+.proposal-content .cost-summary .cost-total {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1E3A8A;
+  margin: 8px 0;
+}
+
+/* Image Blocks */
 .proposal-content .image-block-wrapper {
-  @apply my-4;
+  margin: 20px 0;
 }
 
 .proposal-content .image-placeholder {
-  @apply flex flex-col items-center justify-center gap-2 p-6 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary hover:bg-primary/5 transition-colors text-muted-foreground text-sm;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 24px;
+  border: 2px dashed #CBD5E1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #64748B;
+  font-size: 13px;
+  background: #F8FAFC;
+}
+
+.proposal-content .image-placeholder:hover {
+  border-color: #3B82F6;
+  background: #EFF6FF;
+  color: #1E40AF;
 }
 
 .proposal-content .image-placeholder-icon {
-  @apply text-3xl;
+  font-size: 32px;
+}
+
+.proposal-content .image-container {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.proposal-content .image-container img {
+  max-width: 100%;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  padding: 4px;
+}
+
+.proposal-content figcaption {
+  font-size: 11px;
+  color: #6B7280;
+  font-style: italic;
+  margin-top: 8px;
+  text-align: center;
 }
 
 /* Inline Editing Styles */
@@ -142,7 +408,10 @@ All colors MUST be HSL.
 .proposal-editing [contenteditable="true"] h2,
 .proposal-editing [contenteditable="true"] h3,
 .proposal-editing [contenteditable="true"] li {
-  @apply border border-transparent rounded px-1 transition-all;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 4px;
+  transition: all 0.2s;
 }
 
 .proposal-editing p:hover,
@@ -150,8 +419,8 @@ All colors MUST be HSL.
 .proposal-editing h2:hover,
 .proposal-editing h3:hover,
 .proposal-editing li:hover {
-  border-color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.05);
+  border-color: #F59E0B;
+  background-color: #FFFBEB;
   cursor: text;
 }
 
@@ -160,7 +429,8 @@ All colors MUST be HSL.
 .proposal-editing h2:focus,
 .proposal-editing h3:focus,
 .proposal-editing li:focus {
-  @apply outline-none ring-2 ring-primary/30;
-  border-color: hsl(var(--ring));
-  background-color: hsl(var(--primary) / 0.08);
+  outline: none;
+  border-color: #3B82F6;
+  background-color: #EFF6FF;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
