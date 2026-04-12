@@ -99,8 +99,8 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
       title: `${type === "edited" ? "Editada" : "Manual"} ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
     };
     existing.unshift(newVersion);
-    if (existing.length > 10) existing.splice(10);
-    localStorage.setItem(versionsKey, JSON.stringify(existing));
+    if (existing.length > 5) existing.splice(5);
+    safeSetItem(versionsKey, JSON.stringify(existing));
     setVersions(existing);
   }, []);
 
