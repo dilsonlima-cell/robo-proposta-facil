@@ -79,7 +79,7 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
     const html = contentRef.current.innerHTML;
     setCurrentHtml(html);
     const proposalId = getProposalId();
-    localStorage.setItem(
+    safeSetItem(
       `proposal_${proposalId}_edited`,
       JSON.stringify({ content: html, timestamp: new Date().toISOString(), edited: true })
     );
