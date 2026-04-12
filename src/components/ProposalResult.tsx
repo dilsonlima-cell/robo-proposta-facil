@@ -33,6 +33,28 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
   const [currentHtml, setCurrentHtml] = useState(content);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
+  const safeSetItem = (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      // Quota exceeded – clear old proposals and retry
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("proposal_") && !k.includes(getProposalId())) {
+          keysToRemove.push(k);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+      try {
+        localStorage.setItem(key, value);
+      } catch {
+        // Still failing – skip storage
+        console.warn("localStorage quota exceeded, skipping save");
+      }
+    }
+  };
+
   // Save initial version on first render
   useEffect(() => {
     setCurrentHtml(content);
@@ -47,8 +69,8 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
       title: `Gerada ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
     };
     existing.unshift(newVersion);
-    if (existing.length > 10) existing.splice(10);
-    localStorage.setItem(versionsKey, JSON.stringify(existing));
+    if (existing.length > 5) existing.splice(5);
+    safeSetItem(versionsKey, JSON.stringify(existing));
     setVersions(existing);
   }, [content]);
 
@@ -57,7 +79,7 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
     const html = contentRef.current.innerHTML;
     setCurrentHtml(html);
     const proposalId = getProposalId();
-    localStorage.setItem(
+    safeSetItem(
       `proposal_${proposalId}_edited`,
       JSON.stringify({ content: html, timestamp: new Date().toISOString(), edited: true })
     );
@@ -77,8 +99,8 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
       title: `${type === "edited" ? "Editada" : "Manual"} ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
     };
     existing.unshift(newVersion);
-    if (existing.length > 10) existing.splice(10);
-    localStorage.setItem(versionsKey, JSON.stringify(existing));
+    if (existing.length > 5) existing.splice(5);
+    safeSetItem(versionsKey, JSON.stringify(existing));
     setVersions(existing);
   }, []);
 
