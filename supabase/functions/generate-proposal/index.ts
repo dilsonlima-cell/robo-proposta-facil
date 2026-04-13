@@ -46,7 +46,7 @@ function identifyAgents(miniEscopo: string): string {
     {
       keywords: ["visão artificial", "inspeção automática", "câmera industrial", "visão computacional", "ocr", "detecção de defeitos", "machine vision"],
       agent: "Agente 7: Dispositivos de Inspeção Automática",
-      expertise: "Visão computacional 2D/3D, termografia, OCR/Barcode, detecção de defeitos (injeção: queimadura, short shot, flash; soldagem: porosidade, falta de penetração), integração PLC/MES. Taxa rejeição falsa <5%, aceitação falsa <1%."
+      expertise: "Visão computacional 2D/3D, termografia, OCR/Barcode, detecção de defeitos, integração PLC/MES. Taxa rejeição falsa <5%, aceitação falsa <1%."
     },
     {
       keywords: ["montagem", "célula de montagem", "assembly", "cobot", "colaborativo", "dfma", "pick and place", "end-of-arm", "eoat"],
@@ -66,7 +66,7 @@ function identifyAgents(miniEscopo: string): string {
     {
       keywords: ["misturador", "pesagem", "dosagem", "reator", "tanque", "processamento químico", "batelada", "batch"],
       agent: "Agente 11: Misturadores, Pesagem, Dosagem e Processamento",
-      expertise: "Reatores, tanques de mistura, sistemas de pesagem (carga, plataforma, beltweigher), dosagem estequiométrica, integração ISA-88/IEC 61512, rastreabilidade de lote. Normas: ANVISA, ISO 22000, NR-13."
+      expertise: "Reatores, tanques de mistura, sistemas de pesagem, dosagem estequiométrica, integração ISA-88/IEC 61512, rastreabilidade de lote. Normas: ANVISA, ISO 22000, NR-13."
     },
 
     // AGENTES 12-16: ENGENHARIA MECÂNICA E MANUFATURA AVANÇADA
@@ -78,12 +78,12 @@ function identifyAgents(miniEscopo: string): string {
     {
       keywords: ["usinagem", "estampagem", "moldagem", "conformação", "corte", "fresar", "tornear", "parâmetros de corte"],
       agent: "Agente 13: Processos de Manufatura: Usinagem, Estampagem, Moldagem",
-      expertise: "Parâmetros de corte (Vc, fz, ap, MRR), ferramentas, moldes, conformação de chapas, processos de fabricação (torneamento, fresamento, furação, retificação, eletroerosão). Normas: ISO 230, DIN 8580."
+      expertise: "Parâmetros de corte (Vc, fz, ap, MRR), ferramentas, moldes, conformação de chapas, processos de fabricação. Normas: ISO 230, DIN 8580."
     },
     {
       keywords: ["molde", "injeção", "injetora", "plástico", "cavidade", "canal quente", "hot runner", "ejeção", "polímero", "termoformagem", "sopro", "moldflow"],
       agent: "Agente 14: Moldes Plásticos e Cavidades de Injeção",
-      expertise: "Projeto de moldes de injeção (DFM, runner, resfriamento conformal, ejeção, venting), simulação Moldflow, materiais (DIN 1.2738, Al 7075), validação FAI, manutenção preventiva. Normas: ISO 12100, VDI 2421, NR-12."
+      expertise: "Projeto de moldes de injeção (DFM, runner, resfriamento conformal, ejeção, venting), simulação Moldflow, materiais (DIN 1.2738, Al 7075), validação FAI. Normas: ISO 12100, VDI 2421, NR-12."
     },
     {
       keywords: ["estampo", "dobra", "chapa", "prensa", "punção", "progressivo", "transferência", "repuxo", "embutimento", "estampagem", "matriz"],
@@ -105,7 +105,7 @@ function identifyAgents(miniEscopo: string): string {
     {
       keywords: ["rede industrial", "infraestrutura ti", "servidor", "storage", "backup", "switch", "firewall industrial", "ot/it"],
       agent: "Agente 18: Tecnologia da Informação e Infraestrutura Digital Industrial",
-      expertise: "Redes OT/IT (topologia, segmentação, DMZ), servidores, storage, backup/restore (RTO, RPO), switches industriais, VLANs, conectividade, suporte. Normas: ISA-95/IEC 62264."
+      expertise: "Redes OT/IT (topologia, segmentação, DMZ), servidores, storage, backup/restore (RTO, RPO), switches industriais, VLANs. Normas: ISA-95/IEC 62264."
     },
     {
       keywords: ["embarcado", "fpga", "microcontrolador", "edge computing", "m2m", "iot industrial", "mqtt", "gateway"],
@@ -115,39 +115,39 @@ function identifyAgents(miniEscopo: string): string {
     {
       keywords: ["cibersegurança", "segurança cibernética", "iec 62443", "isa 62443", "hardening", "ids", "ips", "ransomware"],
       agent: "Agente 20: Segurança Cibernética Industrial (OT/IT)",
-      expertise: "Segmentação de rede, hardening, firewalls industriais, IDS/IPS, monitoramento de anomalias, resposta a incidente, gestão de vulnerabilidades. Normas: ISA/IEC 62443, NIST CSF."
+      expertise: "Segmentação de rede, hardening, firewalls industriais, IDS/IPS, monitoramento de anomalias, resposta a incidente. Normas: ISA/IEC 62443, NIST CSF."
     },
     {
       keywords: ["lgpd", "gdpr", "proteção de dados", "privacidade", "consentimento", "anonimização"],
       agent: "Agente 21: Proteção de Dados, Privacidade e Conformidade LGPD/GDPR",
-      expertise: "Coleta e consentimento, anonimização/pseudonimização, auditoria de dados, direitos do titular, DPO, DPIA. Normas: LGPD (Lei 13.709/2018), GDPR, ISO 27701."
+      expertise: "Coleta e consentimento, anonimização/pseudonimização, auditoria de dados, direitos do titular, DPO, DPIA. Normas: LGPD, GDPR, ISO 27701."
     },
 
     // AGENTES 22-26: DADOS, IA E ANALYTICS
     {
       keywords: ["ciência de dados", "analytics", "bi", "dashboard", "kpi", "eda", "estatística", "big data"],
       agent: "Agente 22: Ciência de Dados: Coleta, Processamento, Analytics e BI",
-      expertise: "EDA, modelagem estatística, dashboards, KPIs, métricas, pipelines de dados (ETL/ELT), Data Lake, historiador, SQL/NoSQL. Foco: transformar dados brutos em insights acionáveis."
+      expertise: "EDA, modelagem estatística, dashboards, KPIs, métricas, pipelines de dados (ETL/ELT), Data Lake, historiador, SQL/NoSQL."
     },
     {
       keywords: ["inteligência artificial", "machine learning", "deep learning", "ia", "ml", "detecção de anomalia", "rede neural", "cnn"],
       agent: "Agente 23: Inteligência Artificial e Machine Learning Aplicado à Manufatura",
-      expertise: "Supervised/unsupervised learning, deep learning (CNN, RNN), detecção de anomalias, classificação, regressão, IA preditiva. Foco: aplicação em qualidade, manutenção e otimização."
+      expertise: "Supervised/unsupervised learning, deep learning (CNN, RNN), detecção de anomalias, classificação, regressão, IA preditiva."
     },
     {
       keywords: ["explicabilidade", "xai", "governança de dados", "shap", "lime", "ética ia"],
       agent: "Agente 24: Explicabilidade de IA (XAI) e Governança de Dados",
-      expertise: "Interpretabilidade de modelos (SHAP, LIME), transparência, ethics AI, governança de dados, qualidade de dados, auditoria de modelos. Normas: IEEE 7000, NIST AI RMF, ISO/IEC 42001."
+      expertise: "Interpretabilidade de modelos (SHAP, LIME), transparência, ethics AI, governança de dados. Normas: IEEE 7000, NIST AI RMF, ISO/IEC 42001."
     },
     {
       keywords: ["manutenção", "preventiva", "preditiva", "vibração", "termografia", "lubrificação", "confiabilidade", "mtbf", "mttr", "rcm", "tpm"],
       agent: "Agente 25: Manutenção Preditiva, Confiabilidade e Gestão de Falhas",
-      expertise: "RCM, CBM, TPM, monitoramento de condição (vibração, termografia, análise de óleo), MTBF/MTTR, gestão de sobressalentes, custeio de manutenção, MLOps para manutenção preditiva. Normas: ISO 55001."
+      expertise: "RCM, CBM, TPM, monitoramento de condição, MTBF/MTTR, gestão de sobressalentes, MLOps para manutenção preditiva. Normas: ISO 55001."
     },
     {
       keywords: ["otimização", "reinforcement learning", "algoritmo genético", "heurística", "otimização de processo", "otimização de energia"],
       agent: "Agente 26: Otimização com IA: Processos, Produção e Energia",
-      expertise: "Reinforcement Learning, algoritmos heurísticos (genético, PSO), otimização contínua de processos, energia, produção. Foco: melhorar KPIs automaticamente."
+      expertise: "Reinforcement Learning, algoritmos heurísticos (genético, PSO), otimização contínua de processos, energia, produção."
     },
 
     // AGENTES 27-30: SEGURANÇA, COMPLIANCE E COMUNICAÇÃO
@@ -159,34 +159,34 @@ function identifyAgents(miniEscopo: string): string {
     {
       keywords: ["ehs", "meio ambiente", "saúde", "hazop", "nr-13", "nr13", "caldeira", "vaso de pressão", "tubulação"],
       agent: "Agente 28: EHS Integrado: Segurança, Saúde, Ambiente e Conformidade Regulatória",
-      expertise: "Hierarquia de controles (eliminação→substituição→engenharia→administrativa→EPI), HAZOP, documentação regulatória, auditoria. Vasos de pressão (ASME VIII), tubulações (ASME B31), caldeiras. Normas: NR-13, ASME, API, ISO 45001."
+      expertise: "Hierarquia de controles, HAZOP, vasos de pressão (ASME VIII), tubulações (ASME B31), caldeiras. Normas: NR-13, ASME, API, ISO 45001."
     },
     {
       keywords: ["design", "diagramação", "comunicação visual", "documentação técnica", "layout de documento", "diagrama", "fluxograma"],
       agent: "Agente 29: Design, Diagramação, Comunicação Visual e Documentação Técnica",
-      expertise: "Diagramas técnicos, layouts dimensionados, fluxogramas, gráficos de dados, hierarquia visual, tipografia, acessibilidade WCAG 2.1 AA, identidade corporativa. Normas: ISO 10628-1, ISO 1219-1, ISO 7010."
+      expertise: "Diagramas técnicos, layouts dimensionados, fluxogramas, hierarquia visual, tipografia, acessibilidade WCAG 2.1 AA. Normas: ISO 10628-1, ISO 1219-1, ISO 7010."
     },
     {
       keywords: ["gestão de risco", "compliance", "conformidade", "matriz de risco", "análise de risco", "risco multidimensional"],
       agent: "Agente 30: Gestão de Risco, Conformidade e Integração de Segurança Multidimensional",
-      expertise: "Matriz de risco (probabilidade×impacto), conformidade normativa integrada, riscos em 7 dimensões (operacional, elétrica, cibernética, dados, qualidade, prazo, integração), planos de contingência."
+      expertise: "Matriz de risco (probabilidade×impacto), conformidade normativa integrada, riscos em 7 dimensões, planos de contingência."
     },
 
-    // AGENTES ADICIONAIS DE ESPECIALIDADE CRUZADA
+    // AGENTES AUXILIARES DE ESPECIALIDADE CRUZADA
     {
       keywords: ["material", "aço", "alumínio", "tratamento térmico", "têmpera", "revenido", "nitretação", "cementação", "metalografia", "dureza"],
       agent: "Agente Auxiliar: Materiais e Tratamentos Térmicos",
-      expertise: "Seleção de materiais (aços carbono, ligados, inox, alumínios, polímeros), tratamentos térmicos (têmpera, revenido, nitretação, cementação), ensaios (tração, dureza, impacto, metalografia). Normas: ASTM, DIN, SAE."
+      expertise: "Seleção de materiais (aços carbono, ligados, inox, alumínios, polímeros), tratamentos térmicos, ensaios. Normas: ASTM, DIN, SAE."
     },
     {
       keywords: ["caldeiraria", "estrutura metálica", "silo", "tremonha", "chute", "soldagem estrutural"],
       agent: "Agente Auxiliar: Caldeiraria e Estruturas Metálicas",
-      expertise: "Projeto estrutural (tensões, flechas ≤L/250, flambagem), soldagem estrutural (MIG/MAG, TIG, arco submerso), END (LP, PM, US, RX). Normas: NR-13, ASME VIII/IX, AWS D1.1, NBR 8800."
+      expertise: "Projeto estrutural (tensões, flechas ≤L/250, flambagem), soldagem estrutural, END. Normas: NR-13, ASME VIII/IX, AWS D1.1, NBR 8800."
     },
     {
       keywords: ["pintura", "spray", "pó", "eletrostática", "e-coat", "revestimento", "acabamento superficial", "primer", "cabine de pintura", "estufa", "forno de cura"],
       agent: "Agente Auxiliar: Processos e Equipamentos de Pintura Industrial",
-      expertise: "Pré-tratamento (fosfatização), tintas (epóxi, PU, poliéster), cabines (fluxo 0.4-0.7 m/s), estufas (uniformidade ±3°C), parâmetros de aplicação (HVLP, airless, eletrostática). Normas: ISO 12944, NFPA 33, NR-12."
+      expertise: "Pré-tratamento (fosfatização), tintas (epóxi, PU, poliéster), cabines (fluxo 0.4-0.7 m/s), estufas (uniformidade ±3°C). Normas: ISO 12944, NFPA 33, NR-12."
     },
   ];
 
@@ -402,12 +402,38 @@ DETALHAMENTO DE SERVIÇOS (incluir conforme aplicável):
 11. Aluguel de Equipamentos
 12. Despesas de Campo (translados, hospedagem, alimentação)
 
-FORMATO DE SAÍDA — HTML EXECUTIVO:
-Gere HTML formatado com design executivo profissional. Use estas classes CSS:
+====================================================================
+MOTOR DE DIAGRAMAÇÃO PROFISSIONAL A4 — INSTRUÇÕES DE FORMATAÇÃO
+====================================================================
+
+O documento DEVE ser gerado com estrutura visual pensada para diagramação A4 profissional.
+Especificações do layout A4:
+- Dimensões: 210mm × 297mm
+- Margens: 25mm (topo/base), 20mm (laterais)
+- Área útil: 170mm × 247mm
+- Tipografia corpo: 11pt, line-height 1.5
+- H1: 18pt bold, H2: 14pt semibold, H3: 12pt semibold
+- Parágrafos justificados, espaçamento de 4mm entre parágrafos
+- Tabelas com font 9.5pt, bordas finas
+- Figuras com max-height 150mm e legenda numerada
+- Controle de órfãs/viúvas: mínimo 2 linhas
+- Títulos NUNCA devem ficar isolados no final da página (page-break-after: avoid)
+- Tabelas e figuras NUNCA devem quebrar entre páginas (page-break-inside: avoid)
+- Novo capítulo (H1) DEVE iniciar em nova página
+
+REGRAS DE PAGINAÇÃO PARA O CONTEÚDO GERADO:
+- Após a capa, inserir <div class="page-break"></div> antes de cada nova seção principal (H1)
+- Agrupar conteúdo logicamente para evitar páginas muito vazias (<30% ocupação)
+- Manter título + pelo menos 60mm de conteúdo na mesma página
+- Incluir cabeçalho e rodapé conceituais no HTML
+
+FORMATO DE SAÍDA — HTML EXECUTIVO COM DIAGRAMAÇÃO A4:
+Gere HTML formatado com design executivo profissional e estrutura preparada para paginação A4.
 
 ESTRUTURA VISUAL:
 - <div class="proposal-cover"> para capa executiva (gradiente azul profundo #1E40AF → #3B82F6)
-- <h1 class="proposal-title"> títulos principais
+- <div class="page-break"></div> para quebras de página entre seções principais
+- <h1 class="proposal-title"> títulos principais de seção
 - <h2 class="proposal-subtitle"> subtítulos de seção com ícone Unicode relevante (⚙️, 💰, ⚠️, 📊, 🔧, 📋, etc.)
 - <h3 class="proposal-subtitle"> sub-subtítulos
 - <p class="proposal-text"> texto corpo
@@ -425,6 +451,12 @@ ELEMENTOS VISUAIS OBRIGATÓRIOS:
 - <table class="proposal-table"> tabelas executivas (cabeçalho azul escuro, zebrado)
 - <div class="cost-summary"> resumo de custos
 - <<IMAGEM:NOME>> para placeholders de imagem com descrição técnica
+
+ELEMENTOS A4 ADICIONAIS:
+- <div class="proposal-header"> cabeçalho de página com logo e título abreviado
+- <div class="proposal-footer"> rodapé com número da página e metadados
+- <div class="figure"> para figuras com <div class="figure-caption"> legenda numerada
+- <div class="signature-block"> bloco de assinaturas na última seção
 
 CAPA EXECUTIVA (sempre incluir):
 <div class="proposal-cover">
@@ -467,7 +499,26 @@ ESTRUTURA DA PROPOSTA (15+ SEÇÕES — ajustar conforme versão):
 14. FECHAMENTO COMERCIAL — Recomendar melhor opção, reforçar ganhos
 15. RECOMENDAÇÕES FINAIS — Próximos passos concretos e acionáveis
 
+SEÇÃO DE ASSINATURAS (sempre incluir ao final):
+<div class="signature-block">
+  <h2 class="proposal-subtitle">✍️ Termo de Aceite e Assinaturas</h2>
+  <p class="proposal-text">Pela apresentação desta proposta técnica e comercial, ambas as partes declaram compreender e concordar com os termos, condições e especificações contidas neste documento.</p>
+  <div class="grid-2">
+    <div class="technical-card">
+      <h4>PELA EMPRESA FORNECEDORA:</h4>
+      <div class="signature-line"><div class="line"></div><p>Nome e Assinatura</p><p>Cargo / CREA</p></div>
+      <p>Data: ___/___/______</p>
+    </div>
+    <div class="technical-card">
+      <h4>PELA EMPRESA CLIENTE:</h4>
+      <div class="signature-line"><div class="line"></div><p>Nome e Assinatura</p><p>Cargo</p></div>
+      <p>Data: ___/___/______</p>
+    </div>
+  </div>
+</div>
+
 NÃO use markdown (**, ##, etc). Use HTML puro com as classes acima.
+Insira <div class="page-break"></div> entre cada seção principal para diagramação A4 correta.
 
 REGRAS FINAIS:
 - Linguagem técnica + comercial equilibrada, em português brasileiro
@@ -501,7 +552,7 @@ Processo atual: ${processoAtual || "Não informado"}
 Objetivo do projeto: ${objetivo || "Aumentar produtividade e reduzir custos"}
 Observações: ${observacoes || "Nenhuma"}
 
-Gere o documento completo conforme as instruções do sistema, respeitando rigorosamente o DNA Mestre e a hierarquia de decisão.`;
+Gere o documento completo conforme as instruções do sistema, respeitando rigorosamente o DNA Mestre, a hierarquia de decisão e as regras de diagramação A4 profissional. Insira quebras de página (<div class="page-break"></div>) entre as seções principais para garantir paginação correta no PDF.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
