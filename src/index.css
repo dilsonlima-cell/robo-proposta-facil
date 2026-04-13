@@ -97,7 +97,96 @@
 
 /* ========================================
    EXECUTIVE PROPOSAL DESIGN SYSTEM
+   with A4 PROFESSIONAL DIAGRAMATION
    ======================================== */
+
+/* ==================== A4 PAGE LAYOUT ==================== */
+@page {
+  size: A4;
+  margin: 25mm 20mm;
+  marks: none;
+}
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+  }
+
+  .proposal-content {
+    width: 210mm;
+    margin: 0;
+    padding: 0;
+  }
+
+  .proposal-content .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .proposal-content h1,
+  .proposal-content h2,
+  .proposal-content h3,
+  .proposal-content .proposal-title,
+  .proposal-content .proposal-subtitle {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  .proposal-content table,
+  .proposal-content .proposal-table,
+  .proposal-content .highlight-box,
+  .proposal-content .technical-card,
+  .proposal-content .figure,
+  .proposal-content .image-block-wrapper,
+  .proposal-content .signature-block {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .proposal-content p {
+    orphans: 2;
+    widows: 2;
+  }
+
+  .proposal-content a {
+    text-decoration: none;
+    color: #333;
+  }
+}
+
+/* Page Break */
+.proposal-content .page-break {
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  page-break-after: always;
+  break-after: page;
+}
+
+@media screen {
+  .proposal-content .page-break {
+    height: 2px;
+    margin: 32px 0;
+    background: linear-gradient(90deg, transparent, #CBD5E1, transparent);
+    position: relative;
+  }
+
+  .proposal-content .page-break::after {
+    content: '— quebra de página —';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: #94A3B8;
+    background: white;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+}
 
 /* Cover Page */
 .proposal-content .proposal-cover {
@@ -108,6 +197,10 @@
   margin-bottom: 32px;
   position: relative;
   overflow: hidden;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .proposal-content .proposal-cover::before {
@@ -121,12 +214,24 @@
   border-radius: 50%;
 }
 
+.proposal-content .proposal-cover::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+  border-radius: 50%;
+}
+
 .proposal-content .cover-title {
   font-size: 28px;
   font-weight: 700;
   letter-spacing: 0.05em;
   margin-bottom: 8px;
   position: relative;
+  text-transform: uppercase;
 }
 
 .proposal-content .cover-subtitle {
@@ -151,6 +256,35 @@
   margin-bottom: 2px;
 }
 
+/* Proposal Header (for A4 pages) */
+.proposal-content .proposal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #1E40AF;
+  font-size: 9pt;
+  color: #6B7280;
+}
+
+.proposal-content .proposal-header .logo {
+  max-height: 30px;
+  object-fit: contain;
+}
+
+/* Proposal Footer (for A4 pages) */
+.proposal-content .proposal-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 8px;
+  margin-top: 24px;
+  border-top: 1px solid #E5E7EB;
+  font-size: 8.5pt;
+  color: #9CA3AF;
+}
+
 /* Titles & Headings */
 .proposal-content .proposal-title {
   font-size: 22px;
@@ -158,6 +292,7 @@
   color: #1E40AF;
   margin-bottom: 8px;
   font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  page-break-after: avoid;
 }
 
 .proposal-content .proposal-subtitle {
@@ -169,6 +304,7 @@
   border-left: 4px solid #1E40AF;
   padding-left: 12px;
   font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  page-break-after: avoid;
 }
 
 .proposal-content h3.proposal-subtitle {
@@ -178,6 +314,7 @@
   margin-top: 20px;
   margin-bottom: 8px;
   border-left: 3px solid #3B82F6;
+  page-break-after: avoid;
 }
 
 /* Body Text */
@@ -215,6 +352,7 @@
   margin: 16px 0;
   border-left: 4px solid;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  page-break-inside: avoid;
 }
 
 .proposal-content .highlight-recommendation {
@@ -253,6 +391,7 @@
   padding: 16px;
   border-radius: 8px;
   border: 1px solid #E5E7EB;
+  page-break-inside: avoid;
 }
 
 .proposal-content .technical-card h4 {
@@ -299,6 +438,7 @@
   border-radius: 8px;
   overflow: hidden;
   border: 1px solid #E5E7EB;
+  page-break-inside: avoid;
 }
 
 .proposal-content .proposal-table thead {
@@ -336,6 +476,7 @@
   padding: 20px;
   margin: 20px 0;
   text-align: center;
+  page-break-inside: avoid;
 }
 
 .proposal-content .cost-summary p {
@@ -351,9 +492,61 @@
   margin: 8px 0;
 }
 
+/* Figures with Captions (A4) */
+.proposal-content .figure {
+  margin: 20px 0;
+  text-align: center;
+  page-break-inside: avoid;
+}
+
+.proposal-content .figure img {
+  max-width: 100%;
+  max-height: 400px;
+  border: 1px solid #E5E7EB;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.proposal-content .figure-caption {
+  font-size: 10px;
+  color: #6B7280;
+  margin-top: 8px;
+  font-style: italic;
+  text-align: center;
+}
+
+/* Signature Block (A4) */
+.proposal-content .signature-block {
+  margin-top: 32px;
+  page-break-inside: avoid;
+}
+
+.proposal-content .signature-line {
+  margin-bottom: 16px;
+}
+
+.proposal-content .signature-line .line {
+  width: 200px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 4px;
+  height: 60px;
+}
+
+.proposal-content .signature-line .name {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.proposal-content .signature-line .title {
+  font-size: 10px;
+  color: #6B7280;
+}
+
 /* Image Blocks */
 .proposal-content .image-block-wrapper {
   margin: 20px 0;
+  page-break-inside: avoid;
 }
 
 .proposal-content .image-placeholder {
