@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, FileCheck, Pencil, PencilOff, History, X, Upload } from "lucide-react";
+import { Download, FileCheck, Pencil, PencilOff, History, X } from "lucide-react";
 import { generatePDF } from "@/lib/pdfGenerator";
 
 interface Version {
@@ -14,6 +14,12 @@ interface Version {
 
 interface ProposalResultProps {
   content: string;
+  formData?: {
+    clientName?: string;
+    projectTitle?: string;
+    proposalVersion?: string;
+    initialObjective?: string;
+  };
 }
 
 const getProposalId = () => {
@@ -25,7 +31,7 @@ const getProposalId = () => {
   return id;
 };
 
-const ProposalResult = ({ content }: ProposalResultProps) => {
+const ProposalResult = ({ content, formData }: ProposalResultProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -36,8 +42,7 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
   const safeSetItem = (key: string, value: string) => {
     try {
       localStorage.setItem(key, value);
-    } catch (e) {
-      // Quota exceeded – clear old proposals and retry
+    } catch {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const k = localStorage.key(i);
@@ -45,17 +50,15 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
           keysToRemove.push(k);
         }
       }
-      keysToRemove.forEach(k => localStorage.removeItem(k));
+      keysToRemove.forEach((k) => localStorage.removeItem(k));
       try {
         localStorage.setItem(key, value);
       } catch {
-        // Still failing – skip storage
         console.warn("localStorage quota exceeded, skipping save");
       }
     }
   };
 
-  // Save initial version on first render
   useEffect(() => {
     setCurrentHtml(content);
     const proposalId = getProposalId();
@@ -85,24 +88,27 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
     );
   }, []);
 
-  const saveVersion = useCallback((type: Version["versionType"] = "edited") => {
-    if (!contentRef.current) return;
-    const html = contentRef.current.innerHTML;
-    const proposalId = getProposalId();
-    const versionsKey = `proposal_${proposalId}_versions`;
-    const existing: Version[] = JSON.parse(localStorage.getItem(versionsKey) || "[]");
-    const newVersion: Version = {
-      id: Date.now(),
-      content: html,
-      timestamp: new Date().toISOString(),
-      versionType: type,
-      title: `${type === "edited" ? "Editada" : "Manual"} ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
-    };
-    existing.unshift(newVersion);
-    if (existing.length > 5) existing.splice(5);
-    safeSetItem(versionsKey, JSON.stringify(existing));
-    setVersions(existing);
-  }, []);
+  const saveVersion = useCallback(
+    (type: Version["versionType"] = "edited") => {
+      if (!contentRef.current) return;
+      const html = contentRef.current.innerHTML;
+      const proposalId = getProposalId();
+      const versionsKey = `proposal_${proposalId}_versions`;
+      const existing: Version[] = JSON.parse(localStorage.getItem(versionsKey) || "[]");
+      const newVersion: Version = {
+        id: Date.now(),
+        content: html,
+        timestamp: new Date().toISOString(),
+        versionType: type,
+        title: `${type === "edited" ? "Editada" : "Manual"} ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`,
+      };
+      existing.unshift(newVersion);
+      if (existing.length > 5) existing.splice(5);
+      safeSetItem(versionsKey, JSON.stringify(existing));
+      setVersions(existing);
+    },
+    []
+  );
 
   const loadVersion = (v: Version) => {
     setCurrentHtml(v.content);
@@ -116,15 +122,13 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
   };
 
   const toggleEdit = () => {
-    if (isEditing) {
-      saveVersion("edited");
-    }
+    if (isEditing) saveVersion("edited");
     setIsEditing(!isEditing);
   };
 
   const handleDownload = () => {
     const el = contentRef.current;
-    if (el) generatePDF(el.innerText);
+    if (el) generatePDF(el.innerHTML, formData);
   };
 
   const handleImageUpload = (blockId: string) => {
@@ -156,7 +160,6 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
     input.click();
   };
 
-  // Process HTML content: convert image blocks to interactive placeholders
   const processContent = (html: string) => {
     return html.replace(
       /<<IMAGEM:(\w+)>>/g,
@@ -167,7 +170,6 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
 
   useEffect(() => {
     if (!contentRef.current) return;
-    // Add click handlers for image placeholders
     const handleClick = (e: Event) => {
       const target = e.target as HTMLElement;
       const placeholder = target.closest(".image-placeholder");
@@ -216,18 +218,22 @@ const ProposalResult = ({ content }: ProposalResultProps) => {
           <div className="mt-8 pt-4 border-t border-border flex gap-3">
             <Button onClick={handleDownload} size="lg" className="flex-1 font-heading text-base">
               <Download className="mr-2 h-5 w-5" />
-              Baixar PDF
+              Baixar PDF Profissional
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Version History Sidebar */}
       {showHistory && (
         <div className="fixed right-0 top-0 w-80 h-screen bg-card border-l border-border shadow-xl z-50 overflow-y-auto">
           <div className="p-4 bg-primary text-primary-foreground flex justify-between items-center">
             <span className="font-heading font-semibold">Histórico de Versões</span>
-            <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-primary/80" onClick={() => setShowHistory(false)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary-foreground hover:bg-primary/80"
+              onClick={() => setShowHistory(false)}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>

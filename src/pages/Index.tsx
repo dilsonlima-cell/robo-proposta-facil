@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [proposal, setProposal] = useState<string>("");
+  const [formData, setFormData] = useState<FormData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -25,6 +26,7 @@ const Index = () => {
 
     setIsLoading(true);
     setProposal("");
+    setFormData(data);
 
     try {
       const { data: result, error } = await supabase.functions.invoke("generate-proposal", {
@@ -53,7 +55,7 @@ const Index = () => {
     <div className="min-h-screen bg-background font-body">
       <div className="max-w-4xl mx-auto px-4 py-10">
         <ProposalForm onGenerate={handleGenerate} isLoading={isLoading} />
-        {proposal && <ProposalResult content={proposal} />}
+        {proposal && <ProposalResult content={proposal} formData={formData ? { clientName: formData.clientName, projectTitle: formData.projectTitle, proposalVersion: formData.proposalVersion, initialObjective: formData.initialObjective } : undefined} />}
       </div>
     </div>
   );
