@@ -1,18 +1,13 @@
 import pdfMake from "pdfmake/build/pdfmake";
-import type {
-  TDocumentDefinitions,
-  Content,
-  ContentText,
-  ContentTable,
-  ContentStack,
-  ContentCanvas,
-  TableCell,
-  StyleDictionary,
-} from "pdfmake/interfaces";
 import type { ParsedProposal, SectionType, GanttPhase } from "@/components/pdf/types";
 import { parseProposalHtml, extractGanttFromSections } from "@/lib/proposalParser";
 
-// Use pdfmake's built-in Roboto fonts (supports Latin characters including Portuguese)
+// pdfmake uses Roboto by default which fully supports Portuguese/Latin characters
+
+// Use `any` for pdfmake content to avoid strict typing issues with canvas elements
+type PdfContent = any;
+type PdfStyleDictionary = Record<string, any>;
+type PdfTableCell = any;
 // pdfmake includes Roboto by default which handles UTF-8 with accents
 
 const COLORS = {
