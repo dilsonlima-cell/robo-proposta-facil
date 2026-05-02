@@ -292,16 +292,40 @@ SEÇÕES ADICIONAIS PARA VERSÃO COMPLETA (conforme Seção 0.7 da Fonte de Verd
   }
 }
 
+function generateFallbackProposal(input: Record<string, string | undefined>, selectedAgents: string): string {
+  const today = new Date().toLocaleDateString("pt-BR");
+  const docTitle = input.initialObjective === "Gerar Escopo Técnico" ? "ESCOPO TÉCNICO" : "PROPOSTA TÉCNICA E COMERCIAL";
+  const version = input.proposalVersion || (input.initialObjective === "Gerar Escopo Técnico" ? "Escopo Inicial" : "Normal");
+  const production = Number(input.producao || 0);
+  const cycle = production > 0 ? (3600 / production).toFixed(1) : "a confirmar";
+  const safe = (value?: string, fallback = "A confirmar") => String(value || fallback).replace(/[<>&]/g, (char) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[char] || char));
+
+  return `<div class="proposal-cover"><h1 class="cover-title">${docTitle}</h1><h2 class="cover-subtitle">${safe(input.projectTitle, "Projeto Industrial")}</h2><div class="cover-meta"><p>Cliente: ${safe(input.clientName)}</p><p>Data: ${today}</p><p>Versão: ${safe(version)}</p><p>Documento Nº: PROP-${Date.now().toString().slice(-6)}</p><p>Validade: 60 dias</p></div></div>
+<div class="page-break"></div><div class="proposal-section"><h1 class="proposal-title">1. Apresentação</h1><p class="proposal-text">Este documento consolida uma análise técnica e comercial inicial para o projeto <strong>${safe(input.projectTitle, "Projeto Industrial")}</strong>, considerando as informações fornecidas e uma abordagem executiva orientada à engenharia aplicada.</p><div class="highlight-box highlight-info"><strong>Base de geração:</strong> A proposta foi gerada em modo resiliente para evitar timeout de processamento. As premissas devem ser confirmadas em reunião técnica.</div></div>
+<div class="page-break"></div><div class="proposal-section"><h1 class="proposal-title">2. Contexto e Premissas</h1><p class="proposal-text"><strong>Aplicação:</strong> ${safe(input.miniEscopo)}</p><table class="proposal-table"><thead><tr><th>Parâmetro</th><th>Informação</th><th>Impacto Técnico</th></tr></thead><tbody><tr><td>Produção desejada</td><td>${safe(input.producao, "Não informada")} peças/hora</td><td>Tempo de ciclo estimado: ${cycle} s/peça</td></tr><tr><td>Peça</td><td>${safe(input.peca, "Não informada")}</td><td>Define ferramental, manipulação e controles</td></tr><tr><td>Peso</td><td>${safe(input.peso, "Não informado")} kg</td><td>Define carga útil e fator de segurança</td></tr><tr><td>Ambiente</td><td>${safe(input.ambiente, "Industrial normal")}</td><td>Define proteções, materiais e grau IP</td></tr><tr><td>Automação</td><td>${safe(input.automacao, "Não informada")}</td><td>Define arquitetura de controle e operação</td></tr></tbody></table></div>
+<div class="page-break"></div><div class="proposal-section"><h1 class="proposal-title">3. Alternativas de Solução</h1><table class="proposal-table"><thead><tr><th>Alternativa</th><th>Descrição</th><th>Risco</th><th>Recomendação</th></tr></thead><tbody><tr><td>Conservadora</td><td>Automação parcial mantendo maior intervenção operacional</td><td>Baixo</td><td>Indicada para validação inicial</td></tr><tr><td>Intermediária</td><td>Solução automatizada com integração aos processos existentes</td><td>Médio</td><td>Melhor equilíbrio técnico-comercial</td></tr><tr><td>Otimizada</td><td>Automação completa com maior nível de integração e dados</td><td>Médio/Alto</td><td>Indicada quando performance máxima justificar CAPEX</td></tr></tbody></table><div class="highlight-box highlight-recommendation"><strong>Recomendação preliminar:</strong> adotar a alternativa intermediária, por equilibrar segurança, viabilidade, prazo e retorno.</div></div>
+<div class="page-break"></div><div class="proposal-section"><h1 class="proposal-title">4. Escopo Técnico Proposto</h1><ul class="proposal-list"><li>Levantamento técnico e validação de requisitos.</li><li>Engenharia mecânica, elétrica e de automação conforme necessidade do projeto.</li><li>Definição de layout conceitual, interfaces, sensores e proteções.</li><li>Montagem, testes internos, instalação, comissionamento e treinamento operacional.</li><li>Documentação técnica final e recomendações de manutenção.</li></ul><p class="proposal-text"><strong>Especialidades acionadas:</strong></p><p class="proposal-text">${safe(selectedAgents).replace(/\n\n/g, "<br><br>")}</p><<IMAGEM:LAYOUT_SOLUCAO>></div>
+<div class="page-break"></div><div class="proposal-section"><h1 class="proposal-title">5. Custos, Prazos e Riscos</h1><div class="cost-summary"><p>Engenharia e projeto: a estimar após levantamento</p><p>Materiais e componentes: a estimar após arquitetura final</p><p>Fabricação, montagem e testes: a estimar após detalhamento</p><p class="cost-total">Investimento total: faixa indicativa a confirmar</p></div><table class="proposal-table"><thead><tr><th>Risco</th><th>Probabilidade</th><th>Impacto</th><th>Mitigação</th></tr></thead><tbody><tr><td>Dados técnicos incompletos</td><td>Média</td><td>Alto</td><td>Realizar visita técnica e congelamento de premissas</td></tr><tr><td>Integração com processo existente</td><td>Média</td><td>Médio</td><td>Mapear interfaces e executar FAT/SAT</td></tr><tr><td>Segurança NR-12</td><td>Baixa</td><td>Crítico</td><td>Apreciação de risco desde a fase inicial</td></tr></tbody></table><div class="highlight-box highlight-warning"><strong>Dados a confirmar:</strong> layout real, ciclo atual, dimensões finais da peça, utilidades disponíveis, interfaces elétricas e requisitos de segurança.</div></div>
+<div class="page-break"></div><div class="signature-block"><h2 class="proposal-subtitle">✍️ Termo de Aceite e Assinaturas</h2><p class="proposal-text">Pela apresentação desta proposta técnica e comercial, ambas as partes declaram compreender as premissas, restrições e próximos passos apresentados.</p><div class="grid-2"><div class="technical-card"><h4>PELA EMPRESA FORNECEDORA:</h4><div class="signature-line"><div class="line"></div><p>Nome e Assinatura</p><p>Cargo / CREA</p></div><p>Data: ___/___/______</p></div><div class="technical-card"><h4>PELA EMPRESA CLIENTE:</h4><div class="signature-line"><div class="line"></div><p>Nome e Assinatura</p><p>Cargo</p></div><p>Data: ___/___/______</p></div></div></div>`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  let fallbackInput: Record<string, string | undefined> = {};
+
   try {
-    const { clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes } = await req.json();
+    fallbackInput = await req.json();
+    const { clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes } = fallbackInput;
+    const selectedAgents = identifyAgents(miniEscopo || "");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ proposal: generateFallbackProposal(fallbackInput, selectedAgents), warning: "A geração avançada está indisponível; foi gerada uma proposta executiva local." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    const selectedAgents = identifyAgents(miniEscopo || "");
     const versionInstructions = getVersionDepthInstructions(proposalVersion || "Normal", initialObjective || "Gerar Proposta Técnica e Comercial");
 
     const systemPrompt = `Você é um sistema de coordenação de 30 agentes especializados em engenharia industrial, baseado na ARQUITETURA DE AGENTES ESPECIALIZADOS (Fonte de Verdade — Sistema Completo de 30 Agentes para Engenharia Industrial, Manufatura e Transformação Digital).
@@ -554,20 +578,32 @@ Observações: ${observacoes || "Nenhuma"}
 
 Gere o documento completo conforme as instruções do sistema, respeitando rigorosamente o DNA Mestre, a hierarquia de decisão e as regras de diagramação A4 profissional. Insira quebras de página (<div class="page-break"></div>) entre as seções principais para garantir paginação correta no PDF.`;
 
+    const compactSystemPrompt = `Você gera documentos executivos de engenharia industrial em HTML puro, português brasileiro, com precisão técnica e persuasão comercial.
+Agentes acionados:\n${selectedAgents}\n\n${versionInstructions}
+Regras obrigatórias: diferencie FATO/HIPÓTESE/PREMISSA/ESTIMATIVA; segurança NR-12/ISO 12100 é condição de projeto; declare incertezas; não invente marcas; use premissas explícitas; compare alternativas Conservadora/Intermediária/Otimizada; sinalize riscos operacionais, elétricos, cibernéticos, dados, qualidade, prazo e integração.
+Formato obrigatório: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; <<IMAGEM:NOME>> quando fizer sentido; signature-block no final.
+Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo, 10 Riscos, 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 Visão Conceitual, 14 Fechamento, 15 Recomendações/Assinaturas. Ajuste profundidade à versão.`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 75_000);
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-lite",
+        temperature: 0.25,
+        max_tokens: initialObjective === "Gerar Escopo Técnico" ? 3500 : proposalVersion === "Completa" ? 6500 : proposalVersion === "Basica" ? 3800 : 5200,
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: compactSystemPrompt },
           { role: "user", content: userPrompt },
         ],
       }),
-    });
+    }).finally(() => clearTimeout(timeout));
 
     if (!response.ok) {
       if (response.status === 429) {
@@ -596,13 +632,19 @@ Gere o documento completo conforme as instruções do sistema, respeitando rigor
       throw new Error("Erro ao processar resposta da IA.");
     }
 
-    const proposal = data.choices?.[0]?.message?.content || "Não foi possível gerar a proposta.";
+    const proposal = data.choices?.[0]?.message?.content || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents);
 
     return new Response(JSON.stringify({ proposal }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("Error:", e);
+    if (e instanceof DOMException && e.name === "AbortError") {
+      const selectedAgents = identifyAgents(fallbackInput.miniEscopo || "");
+      return new Response(JSON.stringify({ proposal: generateFallbackProposal(fallbackInput, selectedAgents), warning: "A geração avançada demorou demais; foi gerada uma proposta executiva resiliente para evitar perda dos dados." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

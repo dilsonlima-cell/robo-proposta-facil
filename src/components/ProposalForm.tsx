@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, FileText } from "lucide-react";
+import { Loader2, FileText, Trash2 } from "lucide-react";
 
 export interface FormData {
   clientName: string;
@@ -27,10 +27,13 @@ export interface FormData {
 interface ProposalFormProps {
   onGenerate: (data: FormData) => void;
   isLoading: boolean;
+  initialData?: FormData;
+  onDraftChange?: (data: FormData) => void;
+  onClear?: () => void;
+  hasSavedContent?: boolean;
 }
 
-const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
-  const [form, setForm] = useState<FormData>({
+export const emptyFormData: FormData = {
     clientName: "",
     projectTitle: "",
     initialObjective: "",
@@ -45,7 +48,23 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
     processoAtual: "",
     objetivo: "",
     observacoes: "",
-  });
+};
+
+const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onClear, hasSavedContent }: ProposalFormProps) => {
+  const [form, setForm] = useState<FormData>(initialData || emptyFormData);
+
+  const updateForm = (patch: Partial<FormData>) => {
+    setForm((current) => {
+      const next = { ...current, ...patch };
+      onDraftChange?.(next);
+      return next;
+    });
+  };
+
+  const handleClear = () => {
+    setForm(emptyFormData);
+    onClear?.();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +107,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
               <Input
                 placeholder="Ex: Maguinistic Indústria"
                 value={form.clientName}
-                onChange={(e) => setForm({ ...form, clientName: e.target.value })}
+                onChange={(e) => updateForm({ clientName: e.target.value })}
                 required
               />
             </div>
@@ -97,7 +116,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
               <Input
                 placeholder="Ex: Célula Robotizada para Soldagem MIG"
                 value={form.projectTitle}
-                onChange={(e) => setForm({ ...form, projectTitle: e.target.value })}
+                onChange={(e) => updateForm({ projectTitle: e.target.value })}
                 required
               />
             </div>
@@ -106,7 +125,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Objetivo Inicial *</Label>
-              <Select value={form.initialObjective} onValueChange={(v) => setForm({ ...form, initialObjective: v, proposalVersion: v === "Gerar Escopo Técnico" ? "" : form.proposalVersion })}>
+              <Select value={form.initialObjective} onValueChange={(v) => updateForm({ initialObjective: v, proposalVersion: v === "Gerar Escopo Técnico" ? "" : form.proposalVersion })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Gerar Escopo Técnico">Gerar Escopo Técnico</SelectItem>
@@ -121,7 +140,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
             {showProposalVersion && (
               <div className="space-y-2">
                 <Label className="text-foreground font-medium">Versão da Proposta *</Label>
-                <Select value={form.proposalVersion} onValueChange={(v) => setForm({ ...form, proposalVersion: v })}>
+                <Select value={form.proposalVersion} onValueChange={(v) => updateForm({ proposalVersion: v })}>
                   <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Basica">Básica — Análise superficial, escopo resumido</SelectItem>
@@ -138,7 +157,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
             <Textarea
               placeholder="Descreva o equipamento, sistema, máquina ou serviço desejado. Ex: Célula robotizada para soldagem MIG de chassis automotivo, Molde de injeção para carcaça plástica, Estampo progressivo para corte e dobra de chapa..."
               value={form.miniEscopo}
-              onChange={(e) => setForm({ ...form, miniEscopo: e.target.value })}
+              onChange={(e) => updateForm({ miniEscopo: e.target.value })}
               className="min-h-[100px]"
               required
             />
@@ -160,7 +179,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
                 type="number"
                 placeholder="Peças por hora"
                 value={form.producao}
-                onChange={(e) => setForm({ ...form, producao: e.target.value })}
+                onChange={(e) => updateForm({ producao: e.target.value })}
               />
             </div>
 
@@ -170,7 +189,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
                 type="number"
                 placeholder="kg"
                 value={form.peso}
-                onChange={(e) => setForm({ ...form, peso: e.target.value })}
+                onChange={(e) => updateForm({ peso: e.target.value })}
               />
             </div>
 
@@ -179,13 +198,13 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
               <Input
                 placeholder="Ex: Caixa de papelão 400x300x200mm com 12 unidades"
                 value={form.peca}
-                onChange={(e) => setForm({ ...form, peca: e.target.value })}
+                onChange={(e) => updateForm({ peca: e.target.value })}
               />
             </div>
 
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Dimensões da Peça</Label>
-              <Select value={form.dimensoes} onValueChange={(v) => setForm({ ...form, dimensoes: v })}>
+              <Select value={form.dimensoes} onValueChange={(v) => updateForm({ dimensoes: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Pequena (até 300mm)">Pequena (até 300mm)</SelectItem>
@@ -197,7 +216,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
 
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Nível de Automação</Label>
-              <Select value={form.automacao} onValueChange={(v) => setForm({ ...form, automacao: v })}>
+              <Select value={form.automacao} onValueChange={(v) => updateForm({ automacao: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Semi-automático">Semi-automático</SelectItem>
@@ -208,7 +227,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
 
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Ambiente</Label>
-              <Select value={form.ambiente} onValueChange={(v) => setForm({ ...form, ambiente: v })}>
+              <Select value={form.ambiente} onValueChange={(v) => updateForm({ ambiente: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Industrial normal">Industrial normal</SelectItem>
@@ -221,7 +240,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
 
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Processo Atual</Label>
-              <Select value={form.processoAtual} onValueChange={(v) => setForm({ ...form, processoAtual: v })}>
+              <Select value={form.processoAtual} onValueChange={(v) => updateForm({ processoAtual: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Manual">Manual</SelectItem>
@@ -237,7 +256,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
               <Input
                 placeholder="Ex: Aumentar produtividade, reduzir custos, melhorar qualidade..."
                 value={form.objetivo}
-                onChange={(e) => setForm({ ...form, objetivo: e.target.value })}
+                onChange={(e) => updateForm({ objetivo: e.target.value })}
               />
             </div>
           </div>
@@ -247,21 +266,29 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
             <Textarea
               placeholder="Descreva detalhes adicionais do projeto..."
               value={form.observacoes}
-              onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
+              onChange={(e) => updateForm({ observacoes: e.target.value })}
               className="min-h-[100px]"
             />
           </div>
 
-          <Button type="submit" size="lg" className="w-full font-heading text-base" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Gerando documento...
-              </>
-            ) : (
-              form.initialObjective === "Gerar Escopo Técnico" ? "Gerar Escopo Técnico" : "Gerar Proposta Técnica e Comercial"
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button type="submit" size="lg" className="flex-1 font-heading text-base" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Gerando documento...
+                </>
+              ) : (
+                form.initialObjective === "Gerar Escopo Técnico" ? "Gerar Escopo Técnico" : "Gerar Proposta Técnica e Comercial"
+              )}
+            </Button>
+            {hasSavedContent && (
+              <Button type="button" variant="outline" size="lg" className="font-heading text-base" onClick={handleClear} disabled={isLoading}>
+                <Trash2 className="mr-2 h-5 w-5" />
+                Limpar
+              </Button>
             )}
-          </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

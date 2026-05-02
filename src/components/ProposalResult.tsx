@@ -14,6 +14,7 @@ interface Version {
 
 interface ProposalResultProps {
   content: string;
+  onContentChange?: (content: string) => void;
   formData?: {
     clientName?: string;
     projectTitle?: string;
@@ -31,7 +32,7 @@ const getProposalId = () => {
   return id;
 };
 
-const ProposalResult = ({ content, formData }: ProposalResultProps) => {
+const ProposalResult = ({ content, formData, onContentChange }: ProposalResultProps) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -81,6 +82,7 @@ const ProposalResult = ({ content, formData }: ProposalResultProps) => {
     if (!contentRef.current) return;
     const html = contentRef.current.innerHTML;
     setCurrentHtml(html);
+    onContentChange?.(html);
     const proposalId = getProposalId();
     safeSetItem(
       `proposal_${proposalId}_edited`,
@@ -92,6 +94,7 @@ const ProposalResult = ({ content, formData }: ProposalResultProps) => {
     (type: Version["versionType"] = "edited") => {
       if (!contentRef.current) return;
       const html = contentRef.current.innerHTML;
+      onContentChange?.(html);
       const proposalId = getProposalId();
       const versionsKey = `proposal_${proposalId}_versions`;
       const existing: Version[] = JSON.parse(localStorage.getItem(versionsKey) || "[]");
@@ -107,7 +110,7 @@ const ProposalResult = ({ content, formData }: ProposalResultProps) => {
       safeSetItem(versionsKey, JSON.stringify(existing));
       setVersions(existing);
     },
-    []
+    [onContentChange]
   );
 
   const loadVersion = (v: Version) => {
