@@ -180,7 +180,7 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
                 type="number"
                 placeholder="Peças por hora"
                 value={form.producao}
-                onChange={(e) => setForm({ ...form, producao: e.target.value })}
+                onChange={(e) => updateForm({ producao: e.target.value })}
               />
             </div>
 
@@ -190,7 +190,7 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
                 type="number"
                 placeholder="kg"
                 value={form.peso}
-                onChange={(e) => setForm({ ...form, peso: e.target.value })}
+                onChange={(e) => updateForm({ peso: e.target.value })}
               />
             </div>
 
@@ -199,13 +199,13 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
               <Input
                 placeholder="Ex: Caixa de papelão 400x300x200mm com 12 unidades"
                 value={form.peca}
-                onChange={(e) => setForm({ ...form, peca: e.target.value })}
+                onChange={(e) => updateForm({ peca: e.target.value })}
               />
             </div>
 
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Dimensões da Peça</Label>
-              <Select value={form.dimensoes} onValueChange={(v) => setForm({ ...form, dimensoes: v })}>
+              <Select value={form.dimensoes} onValueChange={(v) => updateForm({ dimensoes: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Pequena (até 300mm)">Pequena (até 300mm)</SelectItem>
@@ -217,7 +217,7 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
 
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Nível de Automação</Label>
-              <Select value={form.automacao} onValueChange={(v) => setForm({ ...form, automacao: v })}>
+              <Select value={form.automacao} onValueChange={(v) => updateForm({ automacao: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Semi-automático">Semi-automático</SelectItem>
@@ -228,7 +228,7 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
 
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Ambiente</Label>
-              <Select value={form.ambiente} onValueChange={(v) => setForm({ ...form, ambiente: v })}>
+              <Select value={form.ambiente} onValueChange={(v) => updateForm({ ambiente: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Industrial normal">Industrial normal</SelectItem>
@@ -241,7 +241,7 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
 
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Processo Atual</Label>
-              <Select value={form.processoAtual} onValueChange={(v) => setForm({ ...form, processoAtual: v })}>
+              <Select value={form.processoAtual} onValueChange={(v) => updateForm({ processoAtual: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Manual">Manual</SelectItem>
@@ -257,7 +257,7 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
               <Input
                 placeholder="Ex: Aumentar produtividade, reduzir custos, melhorar qualidade..."
                 value={form.objetivo}
-                onChange={(e) => setForm({ ...form, objetivo: e.target.value })}
+                onChange={(e) => updateForm({ objetivo: e.target.value })}
               />
             </div>
           </div>
@@ -267,21 +267,29 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
             <Textarea
               placeholder="Descreva detalhes adicionais do projeto..."
               value={form.observacoes}
-              onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
+              onChange={(e) => updateForm({ observacoes: e.target.value })}
               className="min-h-[100px]"
             />
           </div>
 
-          <Button type="submit" size="lg" className="w-full font-heading text-base" disabled={isLoading}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                Gerando documento...
-              </>
-            ) : (
-              form.initialObjective === "Gerar Escopo Técnico" ? "Gerar Escopo Técnico" : "Gerar Proposta Técnica e Comercial"
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button type="submit" size="lg" className="flex-1 font-heading text-base" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  Gerando documento...
+                </>
+              ) : (
+                form.initialObjective === "Gerar Escopo Técnico" ? "Gerar Escopo Técnico" : "Gerar Proposta Técnica e Comercial"
+              )}
+            </Button>
+            {hasSavedContent && (
+              <Button type="button" variant="outline" size="lg" className="font-heading text-base" onClick={handleClear} disabled={isLoading}>
+                <Trash2 className="mr-2 h-5 w-5" />
+                Limpar
+              </Button>
             )}
-          </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
