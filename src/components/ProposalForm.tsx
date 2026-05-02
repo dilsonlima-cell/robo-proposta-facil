@@ -63,7 +63,6 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
 
   const handleClear = () => {
     setForm(emptyFormData);
-    onDraftChange?.(emptyFormData);
     onClear?.();
   };
 
