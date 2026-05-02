@@ -312,8 +312,11 @@ function generateFallbackProposal(input: Record<string, string | undefined>, sel
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  let fallbackInput: Record<string, string | undefined> = {};
+
   try {
-    const { clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes } = await req.json();
+    fallbackInput = await req.json();
+    const { clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes } = fallbackInput;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -627,9 +630,8 @@ Gere o documento completo conforme as instruções do sistema, respeitando rigor
   } catch (e) {
     console.error("Error:", e);
     if (e instanceof DOMException && e.name === "AbortError") {
-      const input = await req.clone().json().catch(() => ({}));
-      const selectedAgents = identifyAgents(input.miniEscopo || "");
-      return new Response(JSON.stringify({ proposal: generateFallbackProposal(input, selectedAgents), warning: "A geração avançada demorou demais; foi gerada uma proposta executiva resiliente para evitar perda dos dados." }), {
+      const selectedAgents = identifyAgents(fallbackInput.miniEscopo || "");
+      return new Response(JSON.stringify({ proposal: generateFallbackProposal(fallbackInput, selectedAgents), warning: "A geração avançada demorou demais; foi gerada uma proposta executiva resiliente para evitar perda dos dados." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
