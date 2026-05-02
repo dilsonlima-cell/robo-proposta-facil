@@ -1,36 +1,73 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProposalForm, { emptyFormData, FormData } from "@/components/ProposalForm";
 import ProposalResult from "@/components/ProposalResult";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 const STORAGE_KEY = "proposal_workspace_state";
+const DB_NAME = "proposal_workspace_db";
+const STORE_NAME = "workspace";
+const PROPOSAL_KEY = "latest_proposal";
 
-const loadSavedWorkspace = (): { proposal: string; formData: FormData } => {
+const loadSavedForm = (): FormData => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) return { proposal: "", formData: emptyFormData };
+    if (!saved) return emptyFormData;
     const parsed = JSON.parse(saved);
-    return { proposal: parsed.proposal || "", formData: { ...emptyFormData, ...(parsed.formData || {}) } };
+    return { ...emptyFormData, ...(parsed.formData || {}) };
   } catch {
-    return { proposal: "", formData: emptyFormData };
+    return emptyFormData;
   }
+};
+
+const openWorkspaceDb = (): Promise<IDBDatabase> =>
+  new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => request.result.createObjectStore(STORE_NAME, { keyPath: "id" });
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+const loadSavedProposal = async (): Promise<string> => {
+  const db = await openWorkspaceDb();
+  return new Promise((resolve) => {
+    const request = db.transaction(STORE_NAME, "readonly").objectStore(STORE_NAME).get(PROPOSAL_KEY);
+    request.onsuccess = () => resolve(request.result?.content || "");
+    request.onerror = () => resolve("");
+  });
+};
+
+const saveProposalContent = async (proposal: string) => {
+  const db = await openWorkspaceDb();
+  const tx = db.transaction(STORE_NAME, "readwrite");
+  tx.objectStore(STORE_NAME).put({ id: PROPOSAL_KEY, content: proposal, updatedAt: new Date().toISOString() });
+};
+
+const clearProposalContent = async () => {
+  const db = await openWorkspaceDb();
+  db.transaction(STORE_NAME, "readwrite").objectStore(STORE_NAME).delete(PROPOSAL_KEY);
 };
 
 const saveWorkspace = (formData: FormData, proposal: string) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ formData, proposal, updatedAt: new Date().toISOString() }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ formData, updatedAt: new Date().toISOString() }));
   } catch {
     console.warn("Não foi possível salvar o rascunho localmente.");
   }
+  saveProposalContent(proposal).catch(() => console.warn("Não foi possível salvar a proposta localmente."));
 };
 
 const Index = () => {
-  const savedWorkspace = loadSavedWorkspace();
-  const [proposal, setProposal] = useState<string>(savedWorkspace.proposal);
-  const [formData, setFormData] = useState<FormData>(savedWorkspace.formData);
+  const [proposal, setProposal] = useState<string>("");
+  const [formData, setFormData] = useState<FormData>(() => loadSavedForm());
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    loadSavedProposal().then((savedProposal) => {
+      if (savedProposal) setProposal(savedProposal);
+    });
+  }, []);
 
   const handleDraftChange = (data: FormData) => {
     setFormData(data);
@@ -41,6 +78,7 @@ const Index = () => {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem("current_proposal_id");
     Object.keys(localStorage).filter((key) => key.startsWith("proposal_")).forEach((key) => localStorage.removeItem(key));
+    clearProposalContent().catch(() => undefined);
     setFormData(emptyFormData);
     setProposal("");
     toast({ title: "Página limpa", description: "Os dados preenchidos e a proposta foram removidos." });
