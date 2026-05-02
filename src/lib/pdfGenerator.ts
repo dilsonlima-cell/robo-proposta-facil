@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
 import type { ParsedProposal, SectionType, GanttPhase } from "@/components/pdf/types";
 import { parseProposalHtml, extractGanttFromSections } from "@/lib/proposalParser";
 
-// pdfmake ships with Roboto which supports Portuguese/Latin characters (UTF-8 safe)
+// Register the default Roboto fonts that ship with pdfmake
+(pdfMake as any).vfs = pdfFonts.pdfMake ? pdfFonts.pdfMake.vfs : pdfFonts;
 
 const COLORS = {
   primaryDark: "#1a3a5c",
