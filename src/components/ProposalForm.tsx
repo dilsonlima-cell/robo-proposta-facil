@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, FileText } from "lucide-react";
+import { Loader2, FileText, Trash2 } from "lucide-react";
 
 export interface FormData {
   clientName: string;
@@ -27,10 +27,13 @@ export interface FormData {
 interface ProposalFormProps {
   onGenerate: (data: FormData) => void;
   isLoading: boolean;
+  initialData?: FormData;
+  onDraftChange?: (data: FormData) => void;
+  onClear?: () => void;
+  hasSavedContent?: boolean;
 }
 
-const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
-  const [form, setForm] = useState<FormData>({
+export const emptyFormData: FormData = {
     clientName: "",
     projectTitle: "",
     initialObjective: "",
@@ -45,7 +48,24 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
     processoAtual: "",
     objetivo: "",
     observacoes: "",
-  });
+};
+
+const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onClear, hasSavedContent }: ProposalFormProps) => {
+  const [form, setForm] = useState<FormData>(initialData || emptyFormData);
+
+  const updateForm = (patch: Partial<FormData>) => {
+    setForm((current) => {
+      const next = { ...current, ...patch };
+      onDraftChange?.(next);
+      return next;
+    });
+  };
+
+  const handleClear = () => {
+    setForm(emptyFormData);
+    onDraftChange?.(emptyFormData);
+    onClear?.();
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +108,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
               <Input
                 placeholder="Ex: Maguinistic Indústria"
                 value={form.clientName}
-                onChange={(e) => setForm({ ...form, clientName: e.target.value })}
+                onChange={(e) => updateForm({ clientName: e.target.value })}
                 required
               />
             </div>
@@ -97,7 +117,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
               <Input
                 placeholder="Ex: Célula Robotizada para Soldagem MIG"
                 value={form.projectTitle}
-                onChange={(e) => setForm({ ...form, projectTitle: e.target.value })}
+                onChange={(e) => updateForm({ projectTitle: e.target.value })}
                 required
               />
             </div>
@@ -106,7 +126,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
               <Label className="text-foreground font-medium">Objetivo Inicial *</Label>
-              <Select value={form.initialObjective} onValueChange={(v) => setForm({ ...form, initialObjective: v, proposalVersion: v === "Gerar Escopo Técnico" ? "" : form.proposalVersion })}>
+              <Select value={form.initialObjective} onValueChange={(v) => updateForm({ initialObjective: v, proposalVersion: v === "Gerar Escopo Técnico" ? "" : form.proposalVersion })}>
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Gerar Escopo Técnico">Gerar Escopo Técnico</SelectItem>
@@ -121,7 +141,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
             {showProposalVersion && (
               <div className="space-y-2">
                 <Label className="text-foreground font-medium">Versão da Proposta *</Label>
-                <Select value={form.proposalVersion} onValueChange={(v) => setForm({ ...form, proposalVersion: v })}>
+                <Select value={form.proposalVersion} onValueChange={(v) => updateForm({ proposalVersion: v })}>
                   <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Basica">Básica — Análise superficial, escopo resumido</SelectItem>
@@ -138,7 +158,7 @@ const ProposalForm = ({ onGenerate, isLoading }: ProposalFormProps) => {
             <Textarea
               placeholder="Descreva o equipamento, sistema, máquina ou serviço desejado. Ex: Célula robotizada para soldagem MIG de chassis automotivo, Molde de injeção para carcaça plástica, Estampo progressivo para corte e dobra de chapa..."
               value={form.miniEscopo}
-              onChange={(e) => setForm({ ...form, miniEscopo: e.target.value })}
+              onChange={(e) => updateForm({ miniEscopo: e.target.value })}
               className="min-h-[100px]"
               required
             />
