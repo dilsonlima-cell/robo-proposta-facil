@@ -317,11 +317,15 @@ serve(async (req) => {
   try {
     fallbackInput = await req.json();
     const { clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes } = fallbackInput;
+    const selectedAgents = identifyAgents(miniEscopo || "");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    if (!LOVABLE_API_KEY) {
+      return new Response(JSON.stringify({ proposal: generateFallbackProposal(fallbackInput, selectedAgents), warning: "A geração avançada está indisponível; foi gerada uma proposta executiva local." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    const selectedAgents = identifyAgents(miniEscopo || "");
     const versionInstructions = getVersionDepthInstructions(proposalVersion || "Normal", initialObjective || "Gerar Proposta Técnica e Comercial");
 
     const systemPrompt = `Você é um sistema de coordenação de 30 agentes especializados em engenharia industrial, baseado na ARQUITETURA DE AGENTES ESPECIALIZADOS (Fonte de Verdade — Sistema Completo de 30 Agentes para Engenharia Industrial, Manufatura e Transformação Digital).
