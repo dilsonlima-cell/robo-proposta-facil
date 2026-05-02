@@ -66,7 +66,7 @@ const Index = () => {
   useEffect(() => {
     loadSavedProposal().then((savedProposal) => {
       if (savedProposal) setProposal(savedProposal);
-    });
+    }).catch(() => undefined);
   }, []);
 
   const handleDraftChange = (data: FormData) => {
