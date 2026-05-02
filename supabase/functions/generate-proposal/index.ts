@@ -571,20 +571,26 @@ Observações: ${observacoes || "Nenhuma"}
 
 Gere o documento completo conforme as instruções do sistema, respeitando rigorosamente o DNA Mestre, a hierarquia de decisão e as regras de diagramação A4 profissional. Insira quebras de página (<div class="page-break"></div>) entre as seções principais para garantir paginação correta no PDF.`;
 
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 115_000);
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
+      signal: controller.signal,
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-2.5-flash-lite",
+        temperature: 0.25,
+        max_tokens: initialObjective === "Gerar Escopo Técnico" ? 4500 : proposalVersion === "Completa" ? 9000 : proposalVersion === "Basica" ? 5000 : 7000,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
       }),
-    });
+    }).finally(() => clearTimeout(timeout));
 
     if (!response.ok) {
       if (response.status === 429) {
@@ -613,13 +619,20 @@ Gere o documento completo conforme as instruções do sistema, respeitando rigor
       throw new Error("Erro ao processar resposta da IA.");
     }
 
-    const proposal = data.choices?.[0]?.message?.content || "Não foi possível gerar a proposta.";
+    const proposal = data.choices?.[0]?.message?.content || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents);
 
     return new Response(JSON.stringify({ proposal }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
     console.error("Error:", e);
+    if (e instanceof DOMException && e.name === "AbortError") {
+      const input = await req.clone().json().catch(() => ({}));
+      const selectedAgents = identifyAgents(input.miniEscopo || "");
+      return new Response(JSON.stringify({ proposal: generateFallbackProposal(input, selectedAgents), warning: "A geração avançada demorou demais; foi gerada uma proposta executiva resiliente para evitar perda dos dados." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
