@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ProposalForm, { emptyFormData, FormData } from "@/components/ProposalForm";
 import ProposalResult from "@/components/ProposalResult";
+import ProposalHistory from "@/components/ProposalHistory";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -84,6 +85,29 @@ const Index = () => {
     toast({ title: "Página limpa", description: "Os dados preenchidos e a proposta foram removidos." });
   };
 
+  const saveToHistory = async (data: FormData, content: string) => {
+    try {
+      await supabase.from("proposals").insert([{
+        client_name: data.clientName || "N/A",
+        project_title: data.projectTitle || "N/A",
+        proposal_version: data.proposalVersion || null,
+        objective: data.initialObjective || null,
+        form_data: JSON.parse(JSON.stringify(data)),
+        content,
+      }]);
+    } catch (err) {
+      console.warn("Não foi possível salvar no histórico:", err);
+    }
+  };
+
+  const handleLoadFromHistory = (content: string, histFormData: Record<string, string>) => {
+    const merged: FormData = { ...emptyFormData, ...histFormData };
+    setFormData(merged);
+    setProposal(content);
+    saveWorkspace(merged, content);
+    toast({ title: "Proposta carregada", description: "A proposta foi restaurada do histórico." });
+  };
+
   const handleGenerate = async (data: FormData) => {
     if (!data.miniEscopo || !data.clientName || !data.projectTitle || !data.initialObjective) {
       toast({ title: "Campos obrigatórios", description: "Preencha Nome do Cliente, Título do Projeto, Objetivo Inicial e Mini Escopo.", variant: "destructive" });
@@ -94,9 +118,6 @@ const Index = () => {
       toast({ title: "Versão obrigatória", description: "Selecione a versão da proposta (Básica, Normal ou Completa).", variant: "destructive" });
       return;
     }
-
-    const newId = "prop_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
-    localStorage.setItem("current_proposal_id", newId);
 
     setIsLoading(true);
     setProposal("");
@@ -119,6 +140,13 @@ const Index = () => {
       if (!result?.proposal) throw new Error("Resposta inválida. Tente novamente.");
       setProposal(result.proposal);
       saveWorkspace(data, result.proposal);
+
+      // Save to database history
+      await saveToHistory(data, result.proposal);
+
+      if (result.warning) {
+        toast({ title: "Aviso", description: result.warning });
+      }
     } catch (err: any) {
       console.error(err);
       toast({ title: "Erro ao gerar documento", description: err.message || "Tente novamente.", variant: "destructive" });
@@ -130,6 +158,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background font-body">
       <div className="max-w-4xl mx-auto px-4 py-10">
+        <ProposalHistory onLoad={handleLoadFromHistory} />
         <ProposalForm onGenerate={handleGenerate} isLoading={isLoading} initialData={formData} onDraftChange={handleDraftChange} onClear={handleClear} hasSavedContent={Boolean(proposal || formData.clientName || formData.projectTitle || formData.miniEscopo)} />
         {proposal && <ProposalResult content={proposal} onContentChange={(content) => { setProposal(content); saveWorkspace(formData, content); }} formData={{ clientName: formData.clientName, projectTitle: formData.projectTitle, proposalVersion: formData.proposalVersion, initialObjective: formData.initialObjective }} />}
       </div>
