@@ -92,7 +92,7 @@ const Index = () => {
         project_title: data.projectTitle || "N/A",
         proposal_version: data.proposalVersion || null,
         objective: data.initialObjective || null,
-        form_data: data as unknown as Record<string, unknown>,
+        form_data: JSON.parse(JSON.stringify(data)),
         content,
       }]);
     } catch (err) {
