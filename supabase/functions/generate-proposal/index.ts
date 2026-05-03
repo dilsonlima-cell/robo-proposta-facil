@@ -550,7 +550,7 @@ REGRAS FINAIS:
 - Clareza e objetividade
 - Segurança como CONDIÇÃO de projeto, não acessório
 - Declarar incertezas e dados faltantes explicitamente
-- Cada agente acionado DEVE contribuir com conteúdo técnico específico
+- Cada especialidade técnica DEVE contribuir com conteúdo específico (NÃO mencione "agente" no documento)
 - A profundidade DEVE ser proporcional à versão selecionada
 - NUNCA inventar especificações sem base
 - NUNCA tratar estimativa como valor fechado
