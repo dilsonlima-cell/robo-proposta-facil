@@ -601,9 +601,9 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-lite",
+        model: "google/gemini-2.5-flash",
         temperature: 0.25,
-        max_tokens: initialObjective === "Gerar Escopo Técnico" ? 3500 : proposalVersion === "Completa" ? 6500 : proposalVersion === "Basica" ? 3800 : 5200,
+        max_tokens: initialObjective === "Gerar Escopo Técnico" ? 8000 : proposalVersion === "Completa" ? 30000 : proposalVersion === "Basica" ? 10000 : 18000,
         messages: [
           { role: "system", content: compactSystemPrompt },
           { role: "user", content: userPrompt },
