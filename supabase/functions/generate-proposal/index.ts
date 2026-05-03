@@ -579,9 +579,15 @@ Observações: ${observacoes || "Nenhuma"}
 Gere o documento completo conforme as instruções do sistema, respeitando rigorosamente o DNA Mestre, a hierarquia de decisão e as regras de diagramação A4 profissional. Insira quebras de página (<div class="page-break"></div>) entre as seções principais para garantir paginação correta no PDF.`;
 
     const compactSystemPrompt = `Você gera documentos executivos de engenharia industrial em HTML puro, português brasileiro, com precisão técnica e persuasão comercial.
-Agentes acionados:\n${selectedAgents}\n\n${versionInstructions}
-Regras obrigatórias: diferencie FATO/HIPÓTESE/PREMISSA/ESTIMATIVA; segurança NR-12/ISO 12100 é condição de projeto; declare incertezas; não invente marcas; use premissas explícitas; compare alternativas Conservadora/Intermediária/Otimizada; sinalize riscos operacionais, elétricos, cibernéticos, dados, qualidade, prazo e integração.
-Formato obrigatório: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; <<IMAGEM:NOME>> quando fizer sentido; signature-block no final.
+Especialidades técnicas consideradas:\n${selectedAgents}\n\n${versionInstructions}
+REGRAS OBRIGATÓRIAS:
+- Diferencie FATO/HIPÓTESE/PREMISSA/ESTIMATIVA; segurança NR-12/ISO 12100 é condição de projeto.
+- Declare incertezas; não invente marcas; use premissas explícitas.
+- Compare alternativas Conservadora/Intermediária/Otimizada; sinalize riscos operacionais, elétricos, cibernéticos, dados, qualidade, prazo e integração.
+- NÃO inclua anotações sobre agentes, IDs de agentes ou metadados internos do sistema no documento. O cliente final NÃO deve saber quais agentes foram utilizados.
+- O documento deve ser COMPLETO — NÃO interrompa ou trunque o conteúdo. Gere TODAS as seções até o final incluindo assinaturas.
+
+FORMATO OBRIGATÓRIO: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; <<IMAGEM:NOME>> quando fizer sentido; signature-block no final.
 Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo, 10 Riscos, 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 Visão Conceitual, 14 Fechamento, 15 Recomendações/Assinaturas. Ajuste profundidade à versão.`;
 
     const controller = new AbortController();
