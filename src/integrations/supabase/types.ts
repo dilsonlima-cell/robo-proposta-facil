@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      proposals: {
+        Row: {
+          client_name: string
+          content: string
+          created_at: string
+          form_data: Json | null
+          id: string
+          objective: string | null
+          project_title: string
+          proposal_version: string | null
+          template_used: string | null
+        }
+        Insert: {
+          client_name: string
+          content: string
+          created_at?: string
+          form_data?: Json | null
+          id?: string
+          objective?: string | null
+          project_title: string
+          proposal_version?: string | null
+          template_used?: string | null
+        }
+        Update: {
+          client_name?: string
+          content?: string
+          created_at?: string
+          form_data?: Json | null
+          id?: string
+          objective?: string | null
+          project_title?: string
+          proposal_version?: string | null
+          template_used?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
