@@ -33,7 +33,7 @@ const ProposalHistory = ({ onLoad }: ProposalHistoryProps) => {
   };
 
   useEffect(() => {
-    if (isOpen) fetchProposals();
+    fetchProposals();
   }, [isOpen]);
 
   const handleDelete = async (id: string) => {
