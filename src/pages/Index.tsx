@@ -87,14 +87,14 @@ const Index = () => {
 
   const saveToHistory = async (data: FormData, content: string) => {
     try {
-      await supabase.from("proposals").insert({
+      await supabase.from("proposals").insert([{
         client_name: data.clientName || "N/A",
         project_title: data.projectTitle || "N/A",
         proposal_version: data.proposalVersion || null,
         objective: data.initialObjective || null,
         form_data: data as unknown as Record<string, unknown>,
         content,
-      });
+      }]);
     } catch (err) {
       console.warn("Não foi possível salvar no histórico:", err);
     }
