@@ -292,6 +292,17 @@ SEÇÕES ADICIONAIS PARA VERSÃO COMPLETA (conforme Seção 0.7 da Fonte de Verd
   }
 }
 
+function buildApplicationAnalysis(input: Record<string, string | undefined>): string {
+  const goal = input.objetivo?.trim() || "aumentar produtividade, reduzir custos operacionais e elevar a confiabilidade do processo";
+  const process = input.processoAtual?.trim() || "processo atual a confirmar em levantamento técnico";
+  const automation = input.automacao?.trim() || "nível de automação a confirmar";
+  const part = input.peca?.trim() || "produto/peça informado no escopo";
+  const production = input.producao?.trim() ? `meta produtiva de ${input.producao} peças/hora` : "meta produtiva ainda não consolidada";
+  const environment = input.ambiente?.trim() || "ambiente industrial";
+
+  return `A necessidade central do cliente é transformar o ${process} em uma solução tecnicamente controlada, segura e escalável para ${part}, alinhando ${production}, ${automation} e condições de ${environment}. A aplicação deve reduzir dependências operacionais, estabilizar repetibilidade, preservar conformidade de segurança e criar uma base confiável para qualidade, manutenção e expansão futura. O foco da proposta, portanto, não é apenas fornecer um equipamento ou serviço, mas estruturar uma solução que resolva a necessidade de negócio declarada: ${goal}.`;
+}
+
 function generateFallbackProposal(input: Record<string, string | undefined>, selectedAgents: string): string {
   const today = new Date().toLocaleDateString("pt-BR");
   const docTitle = input.initialObjective === "Gerar Escopo Técnico" ? "ESCOPO TÉCNICO" : "PROPOSTA TÉCNICA E COMERCIAL";
