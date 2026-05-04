@@ -676,55 +676,33 @@ REGRAS OBRIGATÓRIAS:
 FORMATO OBRIGATÓRIO: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; <<IMAGEM:NOME>> quando fizer sentido; signature-block no final.
 Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo, 10 Riscos, 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 Visão Conceitual, 14 Fechamento, 15 Recomendações/Assinaturas. Ajuste profundidade à versão.`;
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 75_000);
+    const requestBody = {
+      model: "google/gemini-2.5-flash",
+      temperature: 0.2,
+      max_tokens: initialObjective === "Gerar Escopo Técnico" ? 9000 : proposalVersion === "Completa" ? 28000 : proposalVersion === "Basica" ? 10000 : 20000,
+      messages: [
+        { role: "system", content: compactSystemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+    };
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      signal: controller.signal,
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    let proposal = await callAiGateway(LOVABLE_API_KEY, requestBody);
+
+    for (let attempt = 0; attempt < 2 && proposal && !isCompleteProposal(proposal); attempt++) {
+      const continuation = await callAiGateway(LOVABLE_API_KEY, {
         model: "google/gemini-2.5-flash",
-        temperature: 0.25,
-        max_tokens: initialObjective === "Gerar Escopo Técnico" ? 8000 : proposalVersion === "Completa" ? 30000 : proposalVersion === "Basica" ? 10000 : 18000,
+        temperature: 0.15,
+        max_tokens: 9000,
         messages: [
           { role: "system", content: compactSystemPrompt },
-          { role: "user", content: userPrompt },
+          { role: "user", content: `${userPrompt}\n\nO texto anterior foi interrompido. Continue exatamente do ponto em que parou, sem repetir seções já escritas, e obrigatoriamente finalize até o bloco signature-block.` },
+          { role: "assistant", content: proposal.slice(-8000) },
         ],
-      }),
-    }).finally(() => clearTimeout(timeout));
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns minutos." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos esgotados. Adicione créditos em Settings > Workspace > Usage." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI error:", response.status, t);
-      throw new Error("Erro ao gerar proposta com IA");
+      });
+      proposal += continuation;
     }
 
-    const responseText = await response.text();
-    if (!responseText) throw new Error("Resposta vazia da IA.");
-
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch {
-      console.error("Failed to parse:", responseText.substring(0, 500));
-      throw new Error("Erro ao processar resposta da IA.");
-    }
-
-    const proposal = data.choices?.[0]?.message?.content || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents);
+    proposal = sanitizeProposal(proposal || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents));
 
     return new Response(JSON.stringify({ proposal }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
