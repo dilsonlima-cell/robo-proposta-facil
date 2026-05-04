@@ -127,8 +127,8 @@ export function renderTemplate(
       </div>`;
 
     case "minimalist":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:#f5f5f5;font-family:'Inter',system-ui,sans-serif;">
-        <div style="min-height:297mm;padding:80px 60px;display:flex;align-items:center;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;">
+        <div style="min-height:297mm;padding:80px 60px;display:flex;align-items:center;background:#f5f5f5;">
           <div style="display:flex;gap:40px;width:100%;">
             <div style="width:4px;background:${primaryColor};border-radius:2px;"></div>
             <div>
@@ -174,7 +174,7 @@ export function renderTemplate(
 
     case "dark-luxury":
       return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
-        <div style="min-height:297mm;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid ${secondaryColor}33;margin:20px;">
+        <div style="min-height:297mm;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid ${secondaryColor}33;background:#0a0a0a;">
           <div style="font-size:10px;letter-spacing:8px;color:${secondaryColor};">LUXURY</div>
           <div style="width:60px;height:1px;background:${secondaryColor};margin:20px 0;"></div>
           <div style="font-size:14pt;color:#888;margin-bottom:30px;">Proposta Premium</div>
@@ -199,8 +199,8 @@ export function renderTemplate(
       </div>`;
 
     case "editorial":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:#faf9f6;font-family:'Georgia','Times New Roman',serif;">
-        <div style="min-height:297mm;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Georgia','Times New Roman',serif;">
+        <div style="min-height:297mm;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;background:#faf9f6;">
           <h1 style="font-size:64pt;font-weight:900;line-height:0.95;color:#111;font-style:italic;">The Proposal.</h1>
           <div style="width:60px;height:3px;background:${primaryColor};margin:30px 0;"></div>
           <div style="font-size:14pt;color:#555;">${safe(data.client)} · ${safe(data.date)}</div>
