@@ -38,8 +38,13 @@ function escapeHtml(str: string): string {
 
 function buildContentPages(content: string, primaryColor: string, secondaryColor: string): string {
   return `
-    <div style="page-break-before: always; padding: 40px; font-family: 'Inter', system-ui, sans-serif; color: #333; font-size: 11pt; line-height: 1.6;">
+    <div class="proposal-body-pages" style="page-break-before: always; padding: 40px; font-family: 'Inter', system-ui, sans-serif; color: #333; background:#ffffff; font-size: 11pt; line-height: 1.6;">
       <style>
+        .proposal-body-pages, .proposal-body-pages * { box-sizing: border-box; }
+        .proposal-body-pages { background: #ffffff !important; }
+        .proposal-body-pages .proposal-cover { display: none !important; }
+        .proposal-body-pages .proposal-section, .proposal-body-pages .signature-block { background: #ffffff; }
+        .proposal-body-pages .page-break { page-break-after: always; height: 0; }
         .proposal-title { font-size: 18pt; font-weight: 700; color: ${primaryColor}; margin: 30px 0 12px; page-break-after: avoid; }
         .proposal-subtitle { font-size: 14pt; font-weight: 600; color: ${secondaryColor}; margin: 20px 0 8px; page-break-after: avoid; }
         .proposal-text { margin: 0 0 10px; text-align: justify; }
@@ -59,11 +64,9 @@ function buildContentPages(content: string, primaryColor: string, secondaryColor
         .technical-card { background: #f5f5f5; padding: 14px; border-radius: 8px; margin: 8px 0; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-        .page-break { page-break-after: always; height: 0; }
         .signature-block { page-break-inside: avoid; margin-top: 30px; }
         .signature-line .line { border-bottom: 1px solid #333; margin: 30px 0 6px; width: 200px; }
         .proposal-section { margin-bottom: 8px; }
-        .proposal-cover { display: none; }
         .figure { text-align: center; margin: 16px 0; page-break-inside: avoid; }
         .figure-caption { font-size: 9pt; color: #666; margin-top: 6px; }
         h1.proposal-title { page-break-before: always; }
