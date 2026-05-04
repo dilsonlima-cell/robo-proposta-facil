@@ -85,12 +85,12 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
               Plataforma de Engenharia Comercial
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-1">
-              Geração Automatizada de Documentos Técnicos e Comerciais
+              Elaboração de Documentos Técnicos e Comerciais
             </CardDescription>
           </div>
         </div>
         <p className="text-sm text-muted-foreground">
-          Preencha os dados abaixo. O sistema identificará automaticamente os agentes especializados e gerará o documento com profundidade proporcional à versão selecionada.
+          Preencha os dados abaixo. A proposta será estruturada com profundidade proporcional à versão selecionada.
         </p>
       </CardHeader>
       <CardContent>
@@ -162,7 +162,7 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
               required
             />
             <p className="text-xs text-muted-foreground">
-              O sistema identificará automaticamente os agentes especializados com base na sua descrição.
+              Descreva a necessidade do cliente com clareza para orientar a análise técnica e comercial.
             </p>
           </div>
 
