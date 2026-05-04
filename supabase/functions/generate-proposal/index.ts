@@ -405,7 +405,7 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ proposal: generateFallbackProposal(fallbackInput, selectedAgents), warning: "A geração avançada está indisponível; foi gerada uma proposta executiva local." }), {
+      return new Response(JSON.stringify({ proposal: sanitizeProposal(generateFallbackProposal(fallbackInput, selectedAgents)), warning: "A proposta foi elaborada com base nas premissas disponíveis. Recomenda-se revisar os dados técnicos antes do envio ao cliente." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
