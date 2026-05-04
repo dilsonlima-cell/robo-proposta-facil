@@ -38,8 +38,13 @@ function escapeHtml(str: string): string {
 
 function buildContentPages(content: string, primaryColor: string, secondaryColor: string): string {
   return `
-    <div style="page-break-before: always; padding: 40px; font-family: 'Inter', system-ui, sans-serif; color: #333; font-size: 11pt; line-height: 1.6;">
+    <div class="proposal-body-pages" style="page-break-before: always; padding: 40px; font-family: 'Inter', system-ui, sans-serif; color: #333; background:#ffffff; font-size: 11pt; line-height: 1.6;">
       <style>
+        .proposal-body-pages, .proposal-body-pages * { box-sizing: border-box; }
+        .proposal-body-pages { background: #ffffff !important; }
+        .proposal-body-pages .proposal-cover { display: none !important; }
+        .proposal-body-pages .proposal-section, .proposal-body-pages .signature-block { background: #ffffff; }
+        .proposal-body-pages .page-break { page-break-after: always; height: 0; }
         .proposal-title { font-size: 18pt; font-weight: 700; color: ${primaryColor}; margin: 30px 0 12px; page-break-after: avoid; }
         .proposal-subtitle { font-size: 14pt; font-weight: 600; color: ${secondaryColor}; margin: 20px 0 8px; page-break-after: avoid; }
         .proposal-text { margin: 0 0 10px; text-align: justify; }
@@ -59,11 +64,9 @@ function buildContentPages(content: string, primaryColor: string, secondaryColor
         .technical-card { background: #f5f5f5; padding: 14px; border-radius: 8px; margin: 8px 0; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-        .page-break { page-break-after: always; height: 0; }
         .signature-block { page-break-inside: avoid; margin-top: 30px; }
         .signature-line .line { border-bottom: 1px solid #333; margin: 30px 0 6px; width: 200px; }
         .proposal-section { margin-bottom: 8px; }
-        .proposal-cover { display: none; }
         .figure { text-align: center; margin: 16px 0; page-break-inside: avoid; }
         .figure-caption { font-size: 9pt; color: #666; margin-top: 6px; }
         h1.proposal-title { page-break-before: always; }
@@ -104,7 +107,7 @@ export function renderTemplate(
       </div>`;
 
     case "modern-web":
-      return `<div class="page" style="width:297mm;min-height:210mm;background:#1a1a2e;font-family:'Inter',system-ui,sans-serif;color:white;">
+      return `<div class="page" style="width:297mm;min-height:210mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
         <div style="min-height:210mm;padding:60px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#1a1a2e,${primaryColor}33);">
           <div style="display:flex;gap:60px;align-items:center;">
             <div style="flex:1;">
@@ -124,8 +127,8 @@ export function renderTemplate(
       </div>`;
 
     case "minimalist":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:#f5f5f5;font-family:'Inter',system-ui,sans-serif;">
-        <div style="min-height:297mm;padding:80px 60px;display:flex;align-items:center;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;">
+        <div style="min-height:297mm;padding:80px 60px;display:flex;align-items:center;background:#f5f5f5;">
           <div style="display:flex;gap:40px;width:100%;">
             <div style="width:4px;background:${primaryColor};border-radius:2px;"></div>
             <div>
@@ -143,8 +146,8 @@ export function renderTemplate(
       </div>`;
 
     case "corporate-blue":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:${primaryColor};font-family:'Inter',system-ui,sans-serif;color:white;">
-        <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
+        <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;background:${primaryColor};">
           <div style="font-size:12px;letter-spacing:5px;opacity:0.6;">BUSINESS PLAN</div>
           <h1 style="font-size:48pt;font-weight:900;margin:20px 0;">${safe(data.project)}</h1>
           <div style="font-size:14pt;opacity:0.8;margin-bottom:40px;">${safe(data.client)} · ${safe(data.date)}</div>
@@ -158,8 +161,8 @@ export function renderTemplate(
       </div>`;
 
     case "bold-yellow":
-      return `<div class="page" style="width:297mm;min-height:210mm;background:#111;font-family:'Inter',system-ui,sans-serif;color:white;">
-        <div style="min-height:210mm;padding:60px;display:flex;flex-direction:column;justify-content:center;">
+      return `<div class="page" style="width:297mm;min-height:210mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
+        <div style="min-height:210mm;padding:60px;display:flex;flex-direction:column;justify-content:center;background:#111;">
           <div style="width:100px;height:6px;background:${secondaryColor};border-radius:3px;margin-bottom:30px;"></div>
           <div style="font-size:60pt;font-weight:900;line-height:0.95;color:${secondaryColor};">PROJECT<br/>PROPOSAL</div>
           <div style="margin-top:30px;font-size:14pt;color:#ccc;">${safe(data.client)} | ${safe(data.project)}</div>
@@ -170,8 +173,8 @@ export function renderTemplate(
       </div>`;
 
     case "dark-luxury":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:#0a0a0a;font-family:'Inter',system-ui,sans-serif;color:white;">
-        <div style="min-height:297mm;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid ${secondaryColor}33;margin:20px;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
+        <div style="min-height:297mm;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid ${secondaryColor}33;background:#0a0a0a;">
           <div style="font-size:10px;letter-spacing:8px;color:${secondaryColor};">LUXURY</div>
           <div style="width:60px;height:1px;background:${secondaryColor};margin:20px 0;"></div>
           <div style="font-size:14pt;color:#888;margin-bottom:30px;">Proposta Premium</div>
@@ -184,8 +187,8 @@ export function renderTemplate(
       </div>`;
 
     case "tech-gradient":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:linear-gradient(160deg,#0f0c29,#302b63,#24243e);font-family:'Inter',system-ui,sans-serif;color:white;">
-        <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
+        <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(160deg,#0f0c29,#302b63,#24243e);">
           <div style="font-size:56pt;font-weight:900;line-height:1;background:linear-gradient(135deg,${primaryColor},${secondaryColor});-webkit-background-clip:text;color:transparent;">Future<br/>Solutions.</div>
           <div style="font-size:16pt;color:#a0a0ff;margin:30px 0;">${safe(data.project)}</div>
           <div style="font-size:28pt;font-weight:700;margin:20px 0;">${safe(data.value)}</div>
@@ -196,8 +199,8 @@ export function renderTemplate(
       </div>`;
 
     case "editorial":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:#faf9f6;font-family:'Georgia','Times New Roman',serif;">
-        <div style="min-height:297mm;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Georgia','Times New Roman',serif;">
+        <div style="min-height:297mm;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;background:#faf9f6;">
           <h1 style="font-size:64pt;font-weight:900;line-height:0.95;color:#111;font-style:italic;">The Proposal.</h1>
           <div style="width:60px;height:3px;background:${primaryColor};margin:30px 0;"></div>
           <div style="font-size:14pt;color:#555;">${safe(data.client)} · ${safe(data.date)}</div>
@@ -210,19 +213,21 @@ export function renderTemplate(
       </div>`;
 
     case "geometric":
-      return `<div class="page" style="width:297mm;min-height:210mm;background:#f0f0f0;font-family:'Inter',system-ui,sans-serif;position:relative;overflow:hidden;">
+      return `<div class="page" style="width:297mm;min-height:210mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;position:relative;overflow:visible;">
+        <div style="min-height:210mm;background:#f0f0f0;position:relative;overflow:hidden;">
         <div style="position:absolute;right:-50px;top:-50px;width:300px;height:300px;background:${primaryColor};border-radius:50%;opacity:0.15;"></div>
         <div style="position:absolute;left:100px;bottom:-80px;width:200px;height:200px;background:${secondaryColor};transform:rotate(45deg);opacity:0.1;"></div>
         <div style="min-height:210mm;padding:60px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1;">
           <div style="font-size:54pt;font-weight:900;line-height:1;color:#222;">Geometric<br/>Vision.</div>
           <div style="margin-top:24px;font-size:14pt;color:#555;">${safe(data.client)} | ${safe(data.project)}</div>
           <div style="margin-top:16px;font-size:16pt;font-weight:700;color:${primaryColor};">${safe(data.value)} · ${safe(data.date)}</div>
-        </div>
+        </div></div>
         ${contentPages}
       </div>`;
 
     case "glassmorphism":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:linear-gradient(135deg,#667eea,#764ba2);font-family:'Inter',system-ui,sans-serif;color:white;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);">
         <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;align-items:center;">
           <div style="background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:24px;padding:60px;text-align:center;max-width:500px;">
             <div style="font-size:48pt;font-weight:900;line-height:1;">Beyond<br/>Tomorrow.</div>
@@ -230,7 +235,7 @@ export function renderTemplate(
             <div style="font-size:28pt;font-weight:700;margin:24px 0;">${safe(data.value)}</div>
             <div style="opacity:0.6;">${safe(data.date)}</div>
           </div>
-        </div>
+        </div></div>
         ${contentPages}
       </div>`;
 
