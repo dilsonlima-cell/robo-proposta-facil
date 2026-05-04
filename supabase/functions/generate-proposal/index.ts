@@ -303,6 +303,78 @@ function buildApplicationAnalysis(input: Record<string, string | undefined>): st
   return `A necessidade central do cliente é transformar o ${process} em uma solução tecnicamente controlada, segura e escalável para ${part}, alinhando ${production}, ${automation} e condições de ${environment}. A aplicação deve reduzir dependências operacionais, estabilizar repetibilidade, preservar conformidade de segurança e criar uma base confiável para qualidade, manutenção e expansão futura. O foco da proposta, portanto, não é apenas fornecer um equipamento ou serviço, mas estruturar uma solução que resolva a necessidade de negócio declarada: ${goal}.`;
 }
 
+function sanitizeProposal(html: string): string {
+  return html
+    .replace(/gerad[ao]s? automaticamente/gi, "elaborado")
+    .replace(/geração automática/gi, "elaboração")
+    .replace(/inteligência artificial/gi, "engenharia consultiva")
+    .replace(/\bIA\b/g, "engenharia consultiva")
+    .replace(/\bagentes?\b/gi, "especialistas")
+    .replace(/metadados internos[^<.]*/gi, "")
+    .replace(/prompt[^<.]*/gi, "diretriz técnica")
+    .replace(/modo resiliente[^<.]*/gi, "premissas iniciais")
+    .replace(/timeout de processamento/gi, "validação técnica complementar");
+}
+
+function isCompleteProposal(html: string): boolean {
+  const lower = html.toLowerCase();
+  return lower.includes("signature-block") || (lower.includes("termo de aceite") && lower.includes("assinaturas"));
+}
+
+async function readStreamingCompletion(response: Response): Promise<string> {
+  if (!response.body) throw new Error("Resposta sem corpo de streaming.");
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let output = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+
+    let newlineIndex: number;
+    while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
+      let line = buffer.slice(0, newlineIndex);
+      buffer = buffer.slice(newlineIndex + 1);
+      if (line.endsWith("\r")) line = line.slice(0, -1);
+      if (!line.startsWith("data: ")) continue;
+      const payload = line.slice(6).trim();
+      if (!payload || payload === "[DONE]") continue;
+      try {
+        const parsed = JSON.parse(payload);
+        output += parsed.choices?.[0]?.delta?.content || "";
+      } catch {
+        buffer = `${line}\n${buffer}`;
+        break;
+      }
+    }
+  }
+
+  return output;
+}
+
+async function callAiGateway(LOVABLE_API_KEY: string, body: Record<string, unknown>): Promise<string> {
+  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ ...body, stream: true }),
+  });
+
+  if (!response.ok) {
+    if (response.status === 429) throw new Error("Limite de requisições excedido. Tente novamente em alguns minutos.");
+    if (response.status === 402) throw new Error("Créditos esgotados. Adicione créditos em Settings > Workspace > Usage.");
+    const t = await response.text();
+    console.error("AI error:", response.status, t);
+    throw new Error("Erro ao gerar proposta com IA");
+  }
+
+  return readStreamingCompletion(response);
+}
+
 function generateFallbackProposal(input: Record<string, string | undefined>, selectedAgents: string): string {
   const today = new Date().toLocaleDateString("pt-BR");
   const docTitle = input.initialObjective === "Gerar Escopo Técnico" ? "ESCOPO TÉCNICO" : "PROPOSTA TÉCNICA E COMERCIAL";
