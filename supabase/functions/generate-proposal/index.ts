@@ -590,13 +590,15 @@ Observações: ${observacoes || "Nenhuma"}
 
 Gere o documento completo conforme as instruções do sistema, respeitando rigorosamente o DNA Mestre, a hierarquia de decisão e as regras de diagramação A4 profissional. Insira quebras de página (<div class="page-break"></div>) entre as seções principais para garantir paginação correta no PDF.`;
 
-    const compactSystemPrompt = `Você gera documentos executivos de engenharia industrial em HTML puro, português brasileiro, com precisão técnica e persuasão comercial.
-Especialidades técnicas consideradas:\n${selectedAgents}\n\n${versionInstructions}
+    const compactSystemPrompt = `Você redige documentos executivos de engenharia industrial em HTML puro, português brasileiro, com precisão técnica e persuasão comercial.
+Especialidades técnicas consideradas internamente, sem qualquer menção no texto final:\n${selectedAgents}\n\n${versionInstructions}
 REGRAS OBRIGATÓRIAS:
 - Diferencie FATO/HIPÓTESE/PREMISSA/ESTIMATIVA; segurança NR-12/ISO 12100 é condição de projeto.
 - Declare incertezas; não invente marcas; use premissas explícitas.
 - Compare alternativas Conservadora/Intermediária/Otimizada; sinalize riscos operacionais, elétricos, cibernéticos, dados, qualidade, prazo e integração.
-- NÃO inclua anotações sobre agentes, IDs de agentes ou metadados internos do sistema no documento. O cliente final NÃO deve saber quais agentes foram utilizados.
+- É PROIBIDO usar ou sugerir termos como agente, agentes, IA, inteligência artificial, gerado automaticamente, geração automática, sistema automatizado, modelo, prompt, metadados, bastidores, processamento ou qualquer referência ao modo de elaboração.
+- O documento deve soar como uma proposta redigida por uma equipe humana de engenharia consultiva, com autoridade técnica e linguagem comercial premium.
+- No campo/seção Aplicação, NÃO repita o mini escopo. Faça uma análise resumida da necessidade real do cliente, conectando processo atual, objetivo de negócio, restrições, produção desejada, peça, ambiente e nível de automação.
 - O documento deve ser COMPLETO — NÃO interrompa ou trunque o conteúdo. Gere TODAS as seções até o final incluindo assinaturas.
 
 FORMATO OBRIGATÓRIO: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; <<IMAGEM:NOME>> quando fizer sentido; signature-block no final.
