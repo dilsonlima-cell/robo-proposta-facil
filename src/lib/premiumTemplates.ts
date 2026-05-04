@@ -213,14 +213,15 @@ export function renderTemplate(
       </div>`;
 
     case "geometric":
-      return `<div class="page" style="width:297mm;min-height:210mm;background:#f0f0f0;font-family:'Inter',system-ui,sans-serif;position:relative;overflow:hidden;">
+      return `<div class="page" style="width:297mm;min-height:210mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;position:relative;overflow:visible;">
+        <div style="min-height:210mm;background:#f0f0f0;position:relative;overflow:hidden;">
         <div style="position:absolute;right:-50px;top:-50px;width:300px;height:300px;background:${primaryColor};border-radius:50%;opacity:0.15;"></div>
         <div style="position:absolute;left:100px;bottom:-80px;width:200px;height:200px;background:${secondaryColor};transform:rotate(45deg);opacity:0.1;"></div>
         <div style="min-height:210mm;padding:60px;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:1;">
           <div style="font-size:54pt;font-weight:900;line-height:1;color:#222;">Geometric<br/>Vision.</div>
           <div style="margin-top:24px;font-size:14pt;color:#555;">${safe(data.client)} | ${safe(data.project)}</div>
           <div style="margin-top:16px;font-size:16pt;font-weight:700;color:${primaryColor};">${safe(data.value)} · ${safe(data.date)}</div>
-        </div>
+        </div></div>
         ${contentPages}
       </div>`;
 
