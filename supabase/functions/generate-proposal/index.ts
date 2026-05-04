@@ -237,7 +237,7 @@ Estrutura simplificada: Apresentação, Contexto e Premissas, Diagnóstico Técn
     case "Basica":
       return `VERSÃO: BÁSICA — NÍVEL PRÉ-VIABILIDADE (conforme Seção 0.4)
 - Seções obrigatórias: 1-Apresentação, 2-Contexto e Premissas, 3-Alternativas (resumido com tabela comparativa), 4-Recomendação, 5-Escopo (resumido), 8-Estimativa de Custos (valores globais ±30-50%), 9-Prazo (global), 10-Riscos (3 principais), 14-Fechamento, 15-Recomendações.
-- Cada agente acionado contribui com 1-2 parágrafos de conteúdo específico.
+- Cada especialidade técnica identificada contribui com 1-2 parágrafos de conteúdo específico, sem revelar bastidores metodológicos.
 - Diferenciar FATO vs HIPÓTESE vs PREMISSA vs ESTIMATIVA.
 - Declarar dados faltantes e incertezas.
 - Nível de detalhe técnico: SUPERFICIAL mas PRECISO. Ordens de grandeza com margem declarada.
@@ -250,7 +250,7 @@ Estrutura simplificada: Apresentação, Contexto e Premissas, Diagnóstico Técn
 - Estimativa de custos com decomposição por categoria principal (±20-30%).
 - Cronograma com fases e dependências.
 - Gestão de riscos com 5-8 riscos em formato: Descrição, Categoria, Probabilidade, Impacto, Mitigação.
-- Cada agente acionado contribui com análise técnica detalhada (3-5 parágrafos).
+- Cada especialidade técnica identificada contribui com análise técnica detalhada (3-5 parágrafos), sem revelar bastidores metodológicos.
 - Incluir tabela comparativa de alternativas com métricas quantificadas.
 - Especificações funcionais por subsistema.
 - Diferenciar FATO vs HIPÓTESE vs PREMISSA vs ESTIMATIVA.
@@ -261,7 +261,7 @@ Estrutura simplificada: Apresentação, Contexto e Premissas, Diagnóstico Técn
       return `VERSÃO: COMPLETA — NÍVEL ENGENHARIA BÁSICA (conforme Seção 0.4)
 - TODAS as 15+ seções obrigatórias DEVEM estar presentes com MÁXIMO DETALHAMENTO.
 - ANÁLISE TÉCNICA PROFUNDA: cálculos detalhados com fórmulas, premissas quantificadas, cadeia de raciocínio reproduzível.
-- DETALHAMENTO POR ESPECIALIDADE: cada agente acionado DEVE contribuir com conteúdo técnico específico e profundo (5-10 parágrafos).
+- DETALHAMENTO POR ESPECIALIDADE: cada especialidade técnica identificada DEVE contribuir com conteúdo técnico específico e profundo (5-10 parágrafos), sem revelar bastidores metodológicos.
 - HIERARQUIA DE DECISÃO APLICADA: demonstrar como a hierarquia (Segurança→Viabilidade→Confiabilidade→Performance→Custo) foi usada.
 - CRITÉRIOS DE ACEITAÇÃO: métricas mensuráveis (OEE ≥ X%, Cpk ≥ Y, tempo de ciclo ≤ Zs, MTBF > W horas).
 - GESTÃO DE RISCOS COMPLETA: matriz em 7 dimensões (operacional, elétrica, cibernética, dados, qualidade, prazo, integração), com probabilidade×impacto, mitigações específicas.
@@ -275,7 +275,7 @@ Estrutura simplificada: Apresentação, Contexto e Premissas, Diagnóstico Técn
 - Incluir caixas de destaque para recomendações, riscos e informações críticas.
 - Diferenciar explicitamente FATO vs HIPÓTESE vs PREMISSA vs ESTIMATIVA em toda a proposta.
 - Nível de detalhe técnico: MÁXIMO. Equivalente a engenharia básica.
-- Extensão alvo: 20-40 páginas.
+- Extensão alvo: documento completo, priorizando terminar todas as seções com consistência técnica antes de ampliar o volume textual.
 
 SEÇÕES ADICIONAIS PARA VERSÃO COMPLETA (conforme Seção 0.7 da Fonte de Verdade):
 - Seção 16: [Se Investimento] ANÁLISE DE RETORNO (VPL, TIR, payback descontado, sensibilidade)
@@ -285,7 +285,7 @@ SEÇÕES ADICIONAIS PARA VERSÃO COMPLETA (conforme Seção 0.7 da Fonte de Verd
 - Seção 20: [Se IA] GOVERNANÇA DE IA, DADOS E EXPLICABILIDADE
 - Seção 21: [Se Imagens] ESPECIFICAÇÕES DE GERAÇÃO DE IMAGENS
 - Seção 22: [Se Documentação] ESPECIFICAÇÕES DE DIAGRAMAÇÃO
-- Seção 23: METADADOS DO DOCUMENTO`;
+- Seção 23: CONTROLE EXECUTIVO DO DOCUMENTO`;
 
     default:
       return `VERSÃO: NORMAL (padrão). Incluir todas as 15 seções com nível moderado de detalhe.`;
