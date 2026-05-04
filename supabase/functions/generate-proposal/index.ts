@@ -377,7 +377,7 @@ async function callAiGateway(LOVABLE_API_KEY: string, body: Record<string, unkno
     if (response.status === 402) throw new Error("Créditos esgotados. Adicione créditos em Settings > Workspace > Usage.");
     const t = await response.text();
     console.error("AI error:", response.status, t);
-    throw new Error("Erro ao gerar proposta com IA");
+    throw new Error("Erro ao elaborar a proposta.");
   }
 
   return readStreamingCompletion(response);
