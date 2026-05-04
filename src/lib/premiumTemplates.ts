@@ -107,7 +107,7 @@ export function renderTemplate(
       </div>`;
 
     case "modern-web":
-      return `<div class="page" style="width:297mm;min-height:210mm;background:#1a1a2e;font-family:'Inter',system-ui,sans-serif;color:white;">
+      return `<div class="page" style="width:297mm;min-height:210mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
         <div style="min-height:210mm;padding:60px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#1a1a2e,${primaryColor}33);">
           <div style="display:flex;gap:60px;align-items:center;">
             <div style="flex:1;">
@@ -146,8 +146,8 @@ export function renderTemplate(
       </div>`;
 
     case "corporate-blue":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:${primaryColor};font-family:'Inter',system-ui,sans-serif;color:white;">
-        <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
+        <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;background:${primaryColor};">
           <div style="font-size:12px;letter-spacing:5px;opacity:0.6;">BUSINESS PLAN</div>
           <h1 style="font-size:48pt;font-weight:900;margin:20px 0;">${safe(data.project)}</h1>
           <div style="font-size:14pt;opacity:0.8;margin-bottom:40px;">${safe(data.client)} · ${safe(data.date)}</div>
@@ -161,8 +161,8 @@ export function renderTemplate(
       </div>`;
 
     case "bold-yellow":
-      return `<div class="page" style="width:297mm;min-height:210mm;background:#111;font-family:'Inter',system-ui,sans-serif;color:white;">
-        <div style="min-height:210mm;padding:60px;display:flex;flex-direction:column;justify-content:center;">
+      return `<div class="page" style="width:297mm;min-height:210mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
+        <div style="min-height:210mm;padding:60px;display:flex;flex-direction:column;justify-content:center;background:#111;">
           <div style="width:100px;height:6px;background:${secondaryColor};border-radius:3px;margin-bottom:30px;"></div>
           <div style="font-size:60pt;font-weight:900;line-height:0.95;color:${secondaryColor};">PROJECT<br/>PROPOSAL</div>
           <div style="margin-top:30px;font-size:14pt;color:#ccc;">${safe(data.client)} | ${safe(data.project)}</div>
