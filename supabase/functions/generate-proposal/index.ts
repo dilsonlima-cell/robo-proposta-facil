@@ -695,8 +695,8 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução
         max_tokens: 9000,
         messages: [
           { role: "system", content: compactSystemPrompt },
-          { role: "user", content: `${userPrompt}\n\nO texto anterior foi interrompido. Continue exatamente do ponto em que parou, sem repetir seções já escritas, e obrigatoriamente finalize até o bloco signature-block.` },
           { role: "assistant", content: proposal.slice(-8000) },
+          { role: "user", content: "Continue exatamente do ponto em que parou, sem repetir seções já escritas, e obrigatoriamente finalize até o bloco signature-block." },
         ],
       });
       proposal += continuation;
@@ -709,9 +709,19 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução
     });
   } catch (e) {
     console.error("Error:", e);
+    if (e instanceof Error && e.message.includes("Limite de requisições")) {
+      return new Response(JSON.stringify({ error: e.message }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (e instanceof Error && e.message.includes("Créditos esgotados")) {
+      return new Response(JSON.stringify({ error: e.message }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     if (e instanceof DOMException && e.name === "AbortError") {
       const selectedAgents = identifyAgents(fallbackInput.miniEscopo || "");
-      return new Response(JSON.stringify({ proposal: generateFallbackProposal(fallbackInput, selectedAgents), warning: "A geração avançada demorou demais; foi gerada uma proposta executiva resiliente para evitar perda dos dados." }), {
+      return new Response(JSON.stringify({ proposal: sanitizeProposal(generateFallbackProposal(fallbackInput, selectedAgents)), warning: "A proposta foi elaborada com base nas premissas disponíveis. Recomenda-se revisar os dados técnicos antes do envio ao cliente." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
