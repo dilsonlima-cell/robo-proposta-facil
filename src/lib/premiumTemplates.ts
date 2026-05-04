@@ -173,7 +173,7 @@ export function renderTemplate(
       </div>`;
 
     case "dark-luxury":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:#0a0a0a;font-family:'Inter',system-ui,sans-serif;color:white;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
         <div style="min-height:297mm;padding:80px 60px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid ${secondaryColor}33;margin:20px;">
           <div style="font-size:10px;letter-spacing:8px;color:${secondaryColor};">LUXURY</div>
           <div style="width:60px;height:1px;background:${secondaryColor};margin:20px 0;"></div>
@@ -187,8 +187,8 @@ export function renderTemplate(
       </div>`;
 
     case "tech-gradient":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:linear-gradient(160deg,#0f0c29,#302b63,#24243e);font-family:'Inter',system-ui,sans-serif;color:white;">
-        <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
+        <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(160deg,#0f0c29,#302b63,#24243e);">
           <div style="font-size:56pt;font-weight:900;line-height:1;background:linear-gradient(135deg,${primaryColor},${secondaryColor});-webkit-background-clip:text;color:transparent;">Future<br/>Solutions.</div>
           <div style="font-size:16pt;color:#a0a0ff;margin:30px 0;">${safe(data.project)}</div>
           <div style="font-size:28pt;font-weight:700;margin:20px 0;">${safe(data.value)}</div>
@@ -225,7 +225,8 @@ export function renderTemplate(
       </div>`;
 
     case "glassmorphism":
-      return `<div class="page" style="width:210mm;min-height:297mm;background:linear-gradient(135deg,#667eea,#764ba2);font-family:'Inter',system-ui,sans-serif;color:white;">
+      return `<div class="page" style="width:210mm;min-height:297mm;background:#ffffff;font-family:'Inter',system-ui,sans-serif;color:white;">
+        <div style="background:linear-gradient(135deg,#667eea,#764ba2);">
         <div style="min-height:297mm;padding:80px 50px;display:flex;flex-direction:column;justify-content:center;align-items:center;">
           <div style="background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:24px;padding:60px;text-align:center;max-width:500px;">
             <div style="font-size:48pt;font-weight:900;line-height:1;">Beyond<br/>Tomorrow.</div>
@@ -233,7 +234,7 @@ export function renderTemplate(
             <div style="font-size:28pt;font-weight:700;margin:24px 0;">${safe(data.value)}</div>
             <div style="opacity:0.6;">${safe(data.date)}</div>
           </div>
-        </div>
+        </div></div>
         ${contentPages}
       </div>`;
 
