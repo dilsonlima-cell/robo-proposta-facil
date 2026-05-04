@@ -316,6 +316,14 @@ function sanitizeProposal(html: string): string {
     .replace(/timeout de processamento/gi, "validação técnica complementar");
 }
 
+function buildSpecialtyContext(selectedAgents: string): string {
+  return selectedAgents
+    .split(/\n+/)
+    .map((line) => line.replace(/Agente(?: Auxiliar)?\s*\d*:?\s*/gi, "").trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
 function isCompleteProposal(html: string): boolean {
   const lower = html.toLowerCase();
   return lower.includes("signature-block") || (lower.includes("termo de aceite") && lower.includes("assinaturas"));
@@ -411,6 +419,7 @@ serve(async (req) => {
     }
 
     const versionInstructions = getVersionDepthInstructions(proposalVersion || "Normal", initialObjective || "Gerar Proposta Técnica e Comercial");
+    const specialtyContext = buildSpecialtyContext(selectedAgents);
 
     const systemPrompt = `Você é um sistema de coordenação de 30 agentes especializados em engenharia industrial, baseado na ARQUITETURA DE AGENTES ESPECIALIZADOS (Fonte de Verdade — Sistema Completo de 30 Agentes para Engenharia Industrial, Manufatura e Transformação Digital).
 
@@ -663,7 +672,7 @@ Observações: ${observacoes || "Nenhuma"}
 Gere o documento completo conforme as instruções do sistema, respeitando rigorosamente o DNA Mestre, a hierarquia de decisão e as regras de diagramação A4 profissional. Insira quebras de página (<div class="page-break"></div>) entre as seções principais para garantir paginação correta no PDF.`;
 
     const compactSystemPrompt = `Você redige documentos executivos de engenharia industrial em HTML puro, português brasileiro, com precisão técnica e persuasão comercial.
-Especialidades técnicas consideradas internamente, sem qualquer menção no texto final:\n${selectedAgents}\n\n${versionInstructions}
+Especialidades técnicas consideradas internamente, sem qualquer menção no texto final:\n${specialtyContext}\n\n${versionInstructions}
 REGRAS OBRIGATÓRIAS:
 - Diferencie FATO/HIPÓTESE/PREMISSA/ESTIMATIVA; segurança NR-12/ISO 12100 é condição de projeto.
 - Declare incertezas; não invente marcas; use premissas explícitas.
