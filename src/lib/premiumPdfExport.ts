@@ -12,41 +12,51 @@ export async function exportPremiumPDF(
     projectTitle?: string;
     proposalVersion?: string;
     initialObjective?: string;
+    companyName?: string;
+    validadeDias?: string;
+    representanteName?: string;
+    representanteCargo?: string;
+    clientRepName?: string;
+    clientRepCargo?: string;
   }
 ): Promise<void> {
   const template = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
-  const orientation = template.orientation;
-  const isLandscape = orientation === "landscape";
+  const isLandscape = template.orientation === "landscape";
+
+  const proposalDate = new Date().toLocaleDateString("pt-BR");
+  const docNumber = `PROP-${Date.now().toString().slice(-6)}`;
+  const validityDays = formData.validadeDias || "60";
 
   const data: ProposalData = {
     client: formData.clientName || "Cliente",
     project: formData.projectTitle || "Projeto",
     value: "Conforme proposta",
-    date: new Date().toLocaleDateString("pt-BR"),
-    company: "Leve Brisa",
+    date: proposalDate,
+    company: formData.companyName || "Leve Brisa",
     version: formData.proposalVersion || "Normal",
-    docNumber: `PROP-${Date.now().toString().slice(-6)}`,
+    docNumber,
     content: proposalContent,
+    validity: `${validityDays} dias`,
+    representanteName: formData.representanteName,
+    representanteCargo: formData.representanteCargo,
+    clientRepName: formData.clientRepName,
+    clientRepCargo: formData.clientRepCargo,
   };
 
   const fullHtml = renderTemplate(templateId, data, primaryColor, secondaryColor);
 
-  // Create off-screen container — use absolute positioning with clip to keep it
-  // in the DOM flow (so html2canvas can capture it) but invisible to the user
   const wrapper = document.createElement("div");
   wrapper.style.cssText = "position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;z-index:-9999;pointer-events:none;";
   document.body.appendChild(wrapper);
 
   const container = document.createElement("div");
   const widthMM = isLandscape ? 297 : 210;
-  // Convert mm to px at 96dpi: 1mm ≈ 3.7795px
   const widthPx = Math.round(widthMM * 3.7795);
   container.style.cssText = `width:${widthPx}px;background:white;font-size:16px;`;
   container.innerHTML = fullHtml;
   wrapper.appendChild(container);
 
-  // Wait for rendering + fonts
-  await new Promise((r) => setTimeout(r, 800));
+  await new Promise((r) => setTimeout(r, 1000));
 
   try {
     const canvas = await html2canvas(container, {
@@ -70,7 +80,6 @@ export async function exportPremiumPDF(
       const imgData = canvas.toDataURL("image/jpeg", 0.92);
       pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
     } else {
-      // Split into pages by cropping the canvas
       let yOffset = 0;
       let pageNum = 0;
       const srcPageHeight = (pageHeight / imgHeight) * canvas.height;
@@ -96,6 +105,19 @@ export async function exportPremiumPDF(
 
         yOffset += srcPageHeight;
         pageNum++;
+      }
+
+      // Add page numbers (skip first page = cover)
+      const totalPages = pdf.getNumberOfPages();
+      for (let i = 2; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(150, 150, 150);
+        const pageText = `Página ${i - 1} de ${totalPages - 1}`;
+        const textWidth = pdf.getTextWidth(pageText);
+        pdf.text(pageText, pageWidth - textWidth - 10, pageHeight - 8);
+        // Add doc number on the left
+        pdf.text(`${docNumber} · ${proposalDate}`, 10, pageHeight - 8);
       }
     }
 
