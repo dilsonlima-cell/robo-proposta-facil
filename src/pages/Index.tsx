@@ -160,7 +160,7 @@ const Index = () => {
       <div className="max-w-4xl mx-auto px-4 py-10">
         <ProposalHistory onLoad={handleLoadFromHistory} />
         <ProposalForm onGenerate={handleGenerate} isLoading={isLoading} initialData={formData} onDraftChange={handleDraftChange} onClear={handleClear} hasSavedContent={Boolean(proposal || formData.clientName || formData.projectTitle || formData.miniEscopo)} />
-        {proposal && <ProposalResult content={proposal} onContentChange={(content) => { setProposal(content); saveWorkspace(formData, content); }} formData={{ clientName: formData.clientName, projectTitle: formData.projectTitle, proposalVersion: formData.proposalVersion, initialObjective: formData.initialObjective }} />}
+        {proposal && <ProposalResult content={proposal} onContentChange={(content) => { setProposal(content); saveWorkspace(formData, content); }} formData={{ clientName: formData.clientName, projectTitle: formData.projectTitle, proposalVersion: formData.proposalVersion, initialObjective: formData.initialObjective, companyName: formData.companyName, validadeDias: formData.validadeDias, representanteName: formData.representanteName, representanteCargo: formData.representanteCargo, clientRepName: formData.clientRepName, clientRepCargo: formData.clientRepCargo }} />}
       </div>
     </div>
   );
