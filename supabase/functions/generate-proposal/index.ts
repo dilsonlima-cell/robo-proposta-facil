@@ -304,7 +304,7 @@ function buildApplicationAnalysis(input: Record<string, string | undefined>): st
 }
 
 function sanitizeProposal(html: string): string {
-  return html
+  let result = html
     .replace(/gerad[ao]s? automaticamente/gi, "elaborado")
     .replace(/geração automática/gi, "elaboração")
     .replace(/inteligência artificial/gi, "engenharia consultiva")
@@ -314,6 +314,17 @@ function sanitizeProposal(html: string): string {
     .replace(/prompt[^<.]*/gi, "diretriz técnica")
     .replace(/modo resiliente[^<.]*/gi, "premissas iniciais")
     .replace(/timeout de processamento/gi, "validação técnica complementar");
+
+  // Remove entire sections about "Especificações de Diagramação" or "Controle Executivo do Documento"
+  // These are platform-internal formatting instructions, not client-facing content
+  const unwantedSections = [
+    /(<div[^>]*>[\s\S]*?)?<h[1-3][^>]*>[^<]*(Especifica[çc][õo]es de Diagrama[çc][ãa]o|Controle Executivo do Documento|Motor de Diagrama[çc][ãa]o)[^<]*<\/h[1-3]>[\s\S]*?(?=<h[1-3]|<div class="page-break"|<div class="signature-block"|$)/gi,
+  ];
+  for (const regex of unwantedSections) {
+    result = result.replace(regex, "");
+  }
+
+  return result;
 }
 
 function buildSpecialtyContext(selectedAgents: string): string {
