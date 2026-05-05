@@ -761,7 +761,7 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução
       proposal += continuation;
     }
 
-    proposal = sanitizeProposal(proposal || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents));
+    proposal = sanitizeProposal(proposal || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents), fallbackInput);
 
     return new Response(JSON.stringify({ proposal }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
