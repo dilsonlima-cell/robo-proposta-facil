@@ -780,7 +780,7 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução
     }
     if (e instanceof DOMException && e.name === "AbortError") {
       const selectedAgents = identifyAgents(fallbackInput.miniEscopo || "");
-      return new Response(JSON.stringify({ proposal: sanitizeProposal(generateFallbackProposal(fallbackInput, selectedAgents)), warning: "A proposta foi elaborada com base nas premissas disponíveis. Recomenda-se revisar os dados técnicos antes do envio ao cliente." }), {
+      return new Response(JSON.stringify({ proposal: sanitizeProposal(generateFallbackProposal(fallbackInput, selectedAgents), fallbackInput), warning: "A proposta foi elaborada com base nas premissas disponíveis. Recomenda-se revisar os dados técnicos antes do envio ao cliente." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
