@@ -13,6 +13,12 @@ interface TemplatePickerProps {
     projectTitle?: string;
     proposalVersion?: string;
     initialObjective?: string;
+    companyName?: string;
+    validadeDias?: string;
+    representanteName?: string;
+    representanteCargo?: string;
+    clientRepName?: string;
+    clientRepCargo?: string;
   };
 }
 
