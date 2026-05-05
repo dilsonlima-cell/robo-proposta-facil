@@ -725,15 +725,23 @@ Especialidades técnicas consideradas internamente, sem qualquer menção no tex
 REGRAS OBRIGATÓRIAS:
 - Diferencie FATO/HIPÓTESE/PREMISSA/ESTIMATIVA; segurança NR-12/ISO 12100 é condição de projeto.
 - Declare incertezas; não invente marcas; use premissas explícitas.
-- Compare alternativas Conservadora/Intermediária/Otimizada; sinalize riscos operacionais, elétricos, cibernéticos, dados, qualidade, prazo e integração.
+- OBRIGATÓRIO: Gere SEMPRE uma MATRIZ COMPARATIVA com no mínimo 3 rotas (Conservadora, Intermediária, Otimizada) incluindo CAPEX, OPEX, produção/hora, payback e OEE estimado em tabela comparativa.
+- Sinalize riscos operacionais, elétricos, cibernéticos, dados, qualidade, prazo e integração.
 - É PROIBIDO usar ou sugerir termos como agente, agentes, IA, inteligência artificial, gerado automaticamente, geração automática, sistema automatizado, modelo, prompt, metadados, bastidores, processamento ou qualquer referência ao modo de elaboração.
 - O documento deve soar como uma proposta redigida por uma equipe humana de engenharia consultiva, com autoridade técnica e linguagem comercial premium.
-- No campo/seção Aplicação, NÃO repita o mini escopo. Faça uma análise resumida da necessidade real do cliente, conectando processo atual, objetivo de negócio, restrições, produção desejada, peça, ambiente e nível de automação.
+- No campo/seção Aplicação, NÃO repita o mini escopo. Faça uma análise resumida da necessidade real do cliente.
 - O documento deve ser COMPLETO — NÃO interrompa ou trunque o conteúdo. Gere TODAS as seções até o final incluindo assinaturas.
-- NÃO inclua seções sobre "Especificações de Diagramação", "Controle Executivo do Documento", "Motor de Diagramação" ou qualquer instrução de formatação no corpo da proposta. Essas são funções internas da plataforma e NÃO devem aparecer no documento final entregue ao cliente.
+- NÃO inclua seções sobre "Especificações de Diagramação", "Controle Executivo do Documento", "Motor de Diagramação", "Especificações de Geração de Imagens" ou qualquer instrução de formatação no corpo da proposta.
+- Na seção de Cronograma, use uma tabela detalhada com fases nas linhas e semanas nas colunas (S1, S2, ..., S10+), marcando células preenchidas para representar a duração de cada fase. Inclua coluna de descrição/marco ao lado.
+- Na seção de Riscos, inclua colunas: Nível (badge colorido BAIXO/MÉDIO/ALTO), Categoria, Descrição, Probabilidade, Impacto e Mitigação.
+- Na seção de ROI, inclua tabela com 3 cenários (Conservador, Base RECOMENDADO, Otimista) com CAPEX, Benefício Anual, Payback (meses) e Premissas.
+- Dados do representante da empresa proponente: Nome: ${representanteName || 'A ser designado'}, Cargo: ${representanteCargo || 'A ser designado'}.
+- Dados do representante do cliente: Nome: ${clientRepName || 'A ser designado'}, Cargo: ${clientRepCargo || 'A ser designado'}.
+- Empresa proponente: ${companyName || 'Leve Brisa'}. Validade: ${validadeDias || '60'} dias.
+- Data de emissão (usar em TODOS os lugares): ${new Date().toLocaleDateString("pt-BR")}.
 
-FORMATO OBRIGATÓRIO: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; <<IMAGEM:NOME>> quando fizer sentido; signature-block no final.
-Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo, 10 Riscos, 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 Visão Conceitual, 14 Fechamento, 15 Recomendações/Assinaturas. Ajuste profundidade à versão.`;
+FORMATO OBRIGATÓRIO: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; signature-block no final com nomes e cargos preenchidos.
+Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas (MATRIZ OBRIGATÓRIA), 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo/Cronograma, 10 Riscos (MATRIZ), 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 ROI (3 cenários), 14 Fechamento, 15 Assinaturas (com nomes preenchidos). Ajuste profundidade à versão.`;
 
     const requestBody = {
       model: "google/gemini-2.5-flash",
