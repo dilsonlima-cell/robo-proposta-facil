@@ -300,8 +300,18 @@ function buildApplicationAnalysis(input: Record<string, string | undefined>): st
   return `A necessidade central do cliente é transformar o ${process} em uma solução tecnicamente controlada, segura e escalável para ${part}, alinhando ${production}, ${automation} e condições de ${environment}. A aplicação deve reduzir dependências operacionais, estabilizar repetibilidade, preservar conformidade de segurança e criar uma base confiável para qualidade, manutenção e expansão futura. O foco da proposta, portanto, não é apenas fornecer um equipamento ou serviço, mas estruturar uma solução que resolva a necessidade de negócio declarada: ${goal}.`;
 }
 
-function sanitizeProposal(html: string): string {
-  let result = html
+function sanitizeProposal(html: string, formInput?: Record<string, string | undefined>): string {
+  let result = html;
+  
+  // 1. Remove control characters (ASCII 0-31 except \n \r \t, and 127-159)
+  result = result.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+  // Remove zero-width chars
+  result = result.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
+  // Remove sequences of extended latin chars that indicate encoding corruption
+  result = result.replace(/[¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ]{5,}/g, '');
+  
+  // 2. Replace AI/agent terms
+  result = result
     .replace(/gerad[ao]s? automaticamente/gi, "elaborado")
     .replace(/geração automática/gi, "elaboração")
     .replace(/inteligência artificial/gi, "engenharia consultiva")
@@ -310,16 +320,47 @@ function sanitizeProposal(html: string): string {
     .replace(/metadados internos[^<.]*/gi, "")
     .replace(/prompt[^<.]*/gi, "diretriz técnica")
     .replace(/modo resiliente[^<.]*/gi, "premissas iniciais")
-    .replace(/timeout de processamento/gi, "validação técnica complementar");
+    .replace(/timeout de processamento/gi, "validação técnica complementar")
+    .replace(/sistema automatizado/gi, "equipe técnica")
+    .replace(/modelo de linguagem/gi, "metodologia analítica");
 
-  // Remove entire sections about "Especificações de Diagramação" or "Controle Executivo do Documento"
-  // These are platform-internal formatting instructions, not client-facing content
-  const unwantedSections = [
-    /(<div[^>]*>[\s\S]*?)?<h[1-3][^>]*>[^<]*(Especifica[çc][õo]es de Diagrama[çc][ãa]o|Controle Executivo do Documento|Motor de Diagrama[çc][ãa]o)[^<]*<\/h[1-3]>[\s\S]*?(?=<h[1-3]|<div class="page-break"|<div class="signature-block"|$)/gi,
+  // 3. Remove unwanted sections (platform-internal)
+  const unwantedPatterns = [
+    /(<div[^>]*>[\s\S]*?)?<h[1-3][^>]*>[^<]*(Especifica[çc][õo]es de Diagrama[çc][ãa]o|Controle Executivo do Documento|Motor de Diagrama[çc][ãa]o|Especifica[çc][õo]es de Gera[çc][ãa]o de Imagens)[^<]*<\/h[1-3]>[\s\S]*?(?=<h[1-3]|<div class="page-break"|<div class="signature-block"|$)/gi,
   ];
-  for (const regex of unwantedSections) {
+  for (const regex of unwantedPatterns) {
     result = result.replace(regex, "");
   }
+
+  // 4. Fill signature placeholders with form data
+  if (formInput) {
+    const repName = formInput.representanteName || "A ser designado";
+    const repCargo = formInput.representanteCargo || "A ser designado";
+    const clientRep = formInput.clientRepName || "A ser designado";
+    const clientCargo = formInput.clientRepCargo || "A ser designado";
+    const today = new Date().toLocaleDateString("pt-BR");
+    const todayLong = new Date().toLocaleDateString("pt-BR", { day: '2-digit', month: 'long', year: 'numeric' });
+    
+    // Replace placeholder patterns
+    result = result.replace(/\[Nome do Representante[^\]]*\]/gi, repName);
+    result = result.replace(/\[Cargo do Representante[^\]]*\]/gi, repCargo);
+    result = result.replace(/\[Nome[^\]]*Cliente[^\]]*\]/gi, clientRep);
+    result = result.replace(/\[Cargo[^\]]*Cliente[^\]]*\]/gi, clientCargo);
+    result = result.replace(/\[Data[^\]]*\]/gi, today);
+    result = result.replace(/\[CREA[^\]]*\]/gi, repCargo);
+    // Replace any remaining bracket placeholders
+    result = result.replace(/\[[A-ZÀ-Ú][^\]]{3,60}\]/g, "A ser designado");
+    
+    // Fix inconsistent dates - replace any date that doesn't match today
+    result = result.replace(/\d{1,2}\s+de\s+\w+\s+de\s+20\d{2}/gi, todayLong);
+  }
+  
+  // 5. Remove orphaned figure references
+  result = result.replace(/<<IMAGEM:\w+>>/g, '');
+  result = result.replace(/Figura\s+\d+\.\d+[^<]*(?=<)/gi, (match) => {
+    // Only remove if there's no actual image nearby
+    return '';
+  });
 
   return result;
 }
