@@ -13,6 +13,12 @@ interface TemplatePickerProps {
     projectTitle?: string;
     proposalVersion?: string;
     initialObjective?: string;
+    companyName?: string;
+    validadeDias?: string;
+    representanteName?: string;
+    representanteCargo?: string;
+    clientRepName?: string;
+    clientRepCargo?: string;
   };
 }
 
@@ -25,15 +31,21 @@ const TemplatePicker = ({ proposalContent, formData }: TemplatePickerProps) => {
 
   const updatePreview = () => {
     if (!iframeRef.current) return;
+    const validityDays = formData.validadeDias || "60";
     const data: ProposalData = {
       client: formData.clientName || "Cliente",
       project: formData.projectTitle || "Projeto",
       value: "Conforme proposta",
       date: new Date().toLocaleDateString("pt-BR"),
-      company: "Leve Brisa",
+      company: formData.companyName || "Leve Brisa",
       version: formData.proposalVersion || "Normal",
       docNumber: `PROP-${Date.now().toString().slice(-6)}`,
       content: proposalContent,
+      validity: `${validityDays} dias`,
+      representanteName: formData.representanteName,
+      representanteCargo: formData.representanteCargo,
+      clientRepName: formData.clientRepName,
+      clientRepCargo: formData.clientRepCargo,
     };
     const html = renderTemplate(selectedTemplate, data, primaryColor, secondaryColor);
     const doc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;

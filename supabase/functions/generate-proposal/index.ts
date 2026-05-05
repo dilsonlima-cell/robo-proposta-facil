@@ -282,10 +282,7 @@ SEÇÕES ADICIONAIS PARA VERSÃO COMPLETA (conforme Seção 0.7 da Fonte de Verd
 - Seção 17: [Se Segurança] PERIGOS E MEDIDAS DE PROTEÇÃO (ISO 12100, hierarquia de controle)
 - Seção 18: [Se Elétrica] ESPECIFICAÇÕES ELÉTRICAS E PROTEÇÕES
 - Seção 19: [Se TI/Dados] ARQUITETURA DE INFRAESTRUTURA E CIBERSEGURANÇA
-- Seção 20: [Se IA] GOVERNANÇA DE IA, DADOS E EXPLICABILIDADE
-- Seção 21: [Se Imagens] ESPECIFICAÇÕES DE GERAÇÃO DE IMAGENS
-- Seção 22: [Se Documentação] ESPECIFICAÇÕES DE DIAGRAMAÇÃO
-- Seção 23: CONTROLE EXECUTIVO DO DOCUMENTO`;
+- Seção 20: [Se IA] GOVERNANÇA DE IA, DADOS E EXPLICABILIDADE`;
 
     default:
       return `VERSÃO: NORMAL (padrão). Incluir todas as 15 seções com nível moderado de detalhe.`;
@@ -303,8 +300,18 @@ function buildApplicationAnalysis(input: Record<string, string | undefined>): st
   return `A necessidade central do cliente é transformar o ${process} em uma solução tecnicamente controlada, segura e escalável para ${part}, alinhando ${production}, ${automation} e condições de ${environment}. A aplicação deve reduzir dependências operacionais, estabilizar repetibilidade, preservar conformidade de segurança e criar uma base confiável para qualidade, manutenção e expansão futura. O foco da proposta, portanto, não é apenas fornecer um equipamento ou serviço, mas estruturar uma solução que resolva a necessidade de negócio declarada: ${goal}.`;
 }
 
-function sanitizeProposal(html: string): string {
-  let result = html
+function sanitizeProposal(html: string, formInput?: Record<string, string | undefined>): string {
+  let result = html;
+  
+  // 1. Remove control characters (ASCII 0-31 except \n \r \t, and 127-159)
+  result = result.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+  // Remove zero-width chars
+  result = result.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
+  // Remove sequences of extended latin chars that indicate encoding corruption
+  result = result.replace(/[¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ]{5,}/g, '');
+  
+  // 2. Replace AI/agent terms
+  result = result
     .replace(/gerad[ao]s? automaticamente/gi, "elaborado")
     .replace(/geração automática/gi, "elaboração")
     .replace(/inteligência artificial/gi, "engenharia consultiva")
@@ -313,16 +320,47 @@ function sanitizeProposal(html: string): string {
     .replace(/metadados internos[^<.]*/gi, "")
     .replace(/prompt[^<.]*/gi, "diretriz técnica")
     .replace(/modo resiliente[^<.]*/gi, "premissas iniciais")
-    .replace(/timeout de processamento/gi, "validação técnica complementar");
+    .replace(/timeout de processamento/gi, "validação técnica complementar")
+    .replace(/sistema automatizado/gi, "equipe técnica")
+    .replace(/modelo de linguagem/gi, "metodologia analítica");
 
-  // Remove entire sections about "Especificações de Diagramação" or "Controle Executivo do Documento"
-  // These are platform-internal formatting instructions, not client-facing content
-  const unwantedSections = [
-    /(<div[^>]*>[\s\S]*?)?<h[1-3][^>]*>[^<]*(Especifica[çc][õo]es de Diagrama[çc][ãa]o|Controle Executivo do Documento|Motor de Diagrama[çc][ãa]o)[^<]*<\/h[1-3]>[\s\S]*?(?=<h[1-3]|<div class="page-break"|<div class="signature-block"|$)/gi,
+  // 3. Remove unwanted sections (platform-internal)
+  const unwantedPatterns = [
+    /(<div[^>]*>[\s\S]*?)?<h[1-3][^>]*>[^<]*(Especifica[çc][õo]es de Diagrama[çc][ãa]o|Controle Executivo do Documento|Motor de Diagrama[çc][ãa]o|Especifica[çc][õo]es de Gera[çc][ãa]o de Imagens)[^<]*<\/h[1-3]>[\s\S]*?(?=<h[1-3]|<div class="page-break"|<div class="signature-block"|$)/gi,
   ];
-  for (const regex of unwantedSections) {
+  for (const regex of unwantedPatterns) {
     result = result.replace(regex, "");
   }
+
+  // 4. Fill signature placeholders with form data
+  if (formInput) {
+    const repName = formInput.representanteName || "A ser designado";
+    const repCargo = formInput.representanteCargo || "A ser designado";
+    const clientRep = formInput.clientRepName || "A ser designado";
+    const clientCargo = formInput.clientRepCargo || "A ser designado";
+    const today = new Date().toLocaleDateString("pt-BR");
+    const todayLong = new Date().toLocaleDateString("pt-BR", { day: '2-digit', month: 'long', year: 'numeric' });
+    
+    // Replace placeholder patterns
+    result = result.replace(/\[Nome do Representante[^\]]*\]/gi, repName);
+    result = result.replace(/\[Cargo do Representante[^\]]*\]/gi, repCargo);
+    result = result.replace(/\[Nome[^\]]*Cliente[^\]]*\]/gi, clientRep);
+    result = result.replace(/\[Cargo[^\]]*Cliente[^\]]*\]/gi, clientCargo);
+    result = result.replace(/\[Data[^\]]*\]/gi, today);
+    result = result.replace(/\[CREA[^\]]*\]/gi, repCargo);
+    // Replace any remaining bracket placeholders
+    result = result.replace(/\[[A-ZÀ-Ú][^\]]{3,60}\]/g, "A ser designado");
+    
+    // Fix inconsistent dates - replace any date that doesn't match today
+    result = result.replace(/\d{1,2}\s+de\s+\w+\s+de\s+20\d{2}/gi, todayLong);
+  }
+  
+  // 5. Remove orphaned figure references
+  result = result.replace(/<<IMAGEM:\w+>>/g, '');
+  result = result.replace(/Figura\s+\d+\.\d+[^<]*(?=<)/gi, (match) => {
+    // Only remove if there's no actual image nearby
+    return '';
+  });
 
   return result;
 }
@@ -419,12 +457,12 @@ serve(async (req) => {
 
   try {
     fallbackInput = await req.json();
-    const { clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes } = fallbackInput;
+    const { clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes, representanteName, representanteCargo, clientRepName, clientRepCargo, companyName, validadeDias } = fallbackInput;
     const selectedAgents = identifyAgents(miniEscopo || "");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
-      return new Response(JSON.stringify({ proposal: sanitizeProposal(generateFallbackProposal(fallbackInput, selectedAgents)), warning: "A proposta foi elaborada com base nas premissas disponíveis. Recomenda-se revisar os dados técnicos antes do envio ao cliente." }), {
+      return new Response(JSON.stringify({ proposal: sanitizeProposal(generateFallbackProposal(fallbackInput, selectedAgents), fallbackInput), warning: "A proposta foi elaborada com base nas premissas disponíveis. Recomenda-se revisar os dados técnicos antes do envio ao cliente." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -687,15 +725,23 @@ Especialidades técnicas consideradas internamente, sem qualquer menção no tex
 REGRAS OBRIGATÓRIAS:
 - Diferencie FATO/HIPÓTESE/PREMISSA/ESTIMATIVA; segurança NR-12/ISO 12100 é condição de projeto.
 - Declare incertezas; não invente marcas; use premissas explícitas.
-- Compare alternativas Conservadora/Intermediária/Otimizada; sinalize riscos operacionais, elétricos, cibernéticos, dados, qualidade, prazo e integração.
+- OBRIGATÓRIO: Gere SEMPRE uma MATRIZ COMPARATIVA com no mínimo 3 rotas (Conservadora, Intermediária, Otimizada) incluindo CAPEX, OPEX, produção/hora, payback e OEE estimado em tabela comparativa.
+- Sinalize riscos operacionais, elétricos, cibernéticos, dados, qualidade, prazo e integração.
 - É PROIBIDO usar ou sugerir termos como agente, agentes, IA, inteligência artificial, gerado automaticamente, geração automática, sistema automatizado, modelo, prompt, metadados, bastidores, processamento ou qualquer referência ao modo de elaboração.
 - O documento deve soar como uma proposta redigida por uma equipe humana de engenharia consultiva, com autoridade técnica e linguagem comercial premium.
-- No campo/seção Aplicação, NÃO repita o mini escopo. Faça uma análise resumida da necessidade real do cliente, conectando processo atual, objetivo de negócio, restrições, produção desejada, peça, ambiente e nível de automação.
+- No campo/seção Aplicação, NÃO repita o mini escopo. Faça uma análise resumida da necessidade real do cliente.
 - O documento deve ser COMPLETO — NÃO interrompa ou trunque o conteúdo. Gere TODAS as seções até o final incluindo assinaturas.
-- NÃO inclua seções sobre "Especificações de Diagramação", "Controle Executivo do Documento", "Motor de Diagramação" ou qualquer instrução de formatação no corpo da proposta. Essas são funções internas da plataforma e NÃO devem aparecer no documento final entregue ao cliente.
+- NÃO inclua seções sobre "Especificações de Diagramação", "Controle Executivo do Documento", "Motor de Diagramação", "Especificações de Geração de Imagens" ou qualquer instrução de formatação no corpo da proposta.
+- Na seção de Cronograma, use uma tabela detalhada com fases nas linhas e semanas nas colunas (S1, S2, ..., S10+), marcando células preenchidas para representar a duração de cada fase. Inclua coluna de descrição/marco ao lado.
+- Na seção de Riscos, inclua colunas: Nível (badge colorido BAIXO/MÉDIO/ALTO), Categoria, Descrição, Probabilidade, Impacto e Mitigação.
+- Na seção de ROI, inclua tabela com 3 cenários (Conservador, Base RECOMENDADO, Otimista) com CAPEX, Benefício Anual, Payback (meses) e Premissas.
+- Dados do representante da empresa proponente: Nome: ${representanteName || 'A ser designado'}, Cargo: ${representanteCargo || 'A ser designado'}.
+- Dados do representante do cliente: Nome: ${clientRepName || 'A ser designado'}, Cargo: ${clientRepCargo || 'A ser designado'}.
+- Empresa proponente: ${companyName || 'Leve Brisa'}. Validade: ${validadeDias || '60'} dias.
+- Data de emissão (usar em TODOS os lugares): ${new Date().toLocaleDateString("pt-BR")}.
 
-FORMATO OBRIGATÓRIO: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; <<IMAGEM:NOME>> quando fizer sentido; signature-block no final.
-Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo, 10 Riscos, 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 Visão Conceitual, 14 Fechamento, 15 Recomendações/Assinaturas. Ajuste profundidade à versão.`;
+FORMATO OBRIGATÓRIO: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; signature-block no final com nomes e cargos preenchidos.
+Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas (MATRIZ OBRIGATÓRIA), 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo/Cronograma, 10 Riscos (MATRIZ), 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 ROI (3 cenários), 14 Fechamento, 15 Assinaturas (com nomes preenchidos). Ajuste profundidade à versão.`;
 
     const requestBody = {
       model: "google/gemini-2.5-flash",
@@ -723,7 +769,7 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução
       proposal += continuation;
     }
 
-    proposal = sanitizeProposal(proposal || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents));
+    proposal = sanitizeProposal(proposal || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents), fallbackInput);
 
     return new Response(JSON.stringify({ proposal }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -742,7 +788,7 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas, 4 Solução
     }
     if (e instanceof DOMException && e.name === "AbortError") {
       const selectedAgents = identifyAgents(fallbackInput.miniEscopo || "");
-      return new Response(JSON.stringify({ proposal: sanitizeProposal(generateFallbackProposal(fallbackInput, selectedAgents)), warning: "A proposta foi elaborada com base nas premissas disponíveis. Recomenda-se revisar os dados técnicos antes do envio ao cliente." }), {
+      return new Response(JSON.stringify({ proposal: sanitizeProposal(generateFallbackProposal(fallbackInput, selectedAgents), fallbackInput), warning: "A proposta foi elaborada com base nas premissas disponíveis. Recomenda-se revisar os dados técnicos antes do envio ao cliente." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
