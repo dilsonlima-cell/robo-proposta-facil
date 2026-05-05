@@ -282,10 +282,7 @@ SEÇÕES ADICIONAIS PARA VERSÃO COMPLETA (conforme Seção 0.7 da Fonte de Verd
 - Seção 17: [Se Segurança] PERIGOS E MEDIDAS DE PROTEÇÃO (ISO 12100, hierarquia de controle)
 - Seção 18: [Se Elétrica] ESPECIFICAÇÕES ELÉTRICAS E PROTEÇÕES
 - Seção 19: [Se TI/Dados] ARQUITETURA DE INFRAESTRUTURA E CIBERSEGURANÇA
-- Seção 20: [Se IA] GOVERNANÇA DE IA, DADOS E EXPLICABILIDADE
-- Seção 21: [Se Imagens] ESPECIFICAÇÕES DE GERAÇÃO DE IMAGENS
-- Seção 22: [Se Documentação] ESPECIFICAÇÕES DE DIAGRAMAÇÃO
-- Seção 23: CONTROLE EXECUTIVO DO DOCUMENTO`;
+- Seção 20: [Se IA] GOVERNANÇA DE IA, DADOS E EXPLICABILIDADE`;
 
     default:
       return `VERSÃO: NORMAL (padrão). Incluir todas as 15 seções com nível moderado de detalhe.`;
