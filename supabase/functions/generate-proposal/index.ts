@@ -457,7 +457,7 @@ serve(async (req) => {
 
   try {
     fallbackInput = await req.json();
-    const { clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes } = fallbackInput;
+    const { clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes, representanteName, representanteCargo, clientRepName, clientRepCargo, companyName, validadeDias } = fallbackInput;
     const selectedAgents = identifyAgents(miniEscopo || "");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
