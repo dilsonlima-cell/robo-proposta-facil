@@ -302,6 +302,10 @@ function buildApplicationAnalysis(input: Record<string, string | undefined>): st
 
 function sanitizeProposal(html: string, formInput?: Record<string, string | undefined>): string {
   let result = html;
+
+  // 0. CRÍTICO: Strip markdown code fences (```html, ```, ~~~)
+  result = result.replace(/```[\w]*\n?|```/g, '');
+  result = result.replace(/~~~[\w]*\n?|~~~/g, '');
   
   // 1. Remove control characters (ASCII 0-31 except \n \r \t, and 127-159)
   result = result.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
@@ -722,6 +726,59 @@ Gere o documento completo conforme as instruções do sistema, respeitando rigor
 
     const compactSystemPrompt = `Você redige documentos executivos de engenharia industrial em HTML puro, português brasileiro, com precisão técnica e persuasão comercial.
 Especialidades técnicas consideradas internamente, sem qualquer menção no texto final:\n${specialtyContext}\n\n${versionInstructions}
+
+═══════════════════════════════════════════════
+REGRA 0 — FORMATO DE SAÍDA (CRÍTICO)
+═══════════════════════════════════════════════
+- Retorne APENAS o código HTML puro, sem nenhum texto antes ou depois.
+- NUNCA use delimitadores de bloco de código Markdown (\`\`\`html, \`\`\`, ~~~).
+- Não inclua explicações, comentários fora do HTML, nem preamble.
+- O output começa com a primeira tag HTML e termina com a última. Nada mais.
+
+═══════════════════════════════════════════════
+REGRAS DE CSS OBRIGATÓRIAS PARA TABELAS
+═══════════════════════════════════════════════
+TODAS as tabelas DEVEM usar:
+- table-layout: fixed (CRÍTICO: força colunas dentro da largura)
+- word-wrap: break-word e overflow-wrap: break-word em td e th
+- Zebra-striping: tr:nth-child(even) td { background: #f5f7fa; }
+- Última linha: tr:last-child td { border-bottom: 2px solid cor-primaria; }
+- Badges de status: <span class="badge badge-alto/medio/baixo">ALTO</span>
+
+═══════════════════════════════════════════════
+REGRA CRONOGRAMA/GANTT (CRÍTICO)
+═══════════════════════════════════════════════
+- ATÉ 12 semanas: use colunas S1-S12 com font-size 7.5pt, coluna Fase com width 35mm, demais ~11mm cada.
+- MAIS DE 12 semanas: AGRUPE por meses (Mês 1, Mês 2...) com no máximo 6 colunas de tempo.
+- SEMPRE use <colgroup> com larguras fixas.
+- Células ativas: background com cor-secundaria do template.
+- NUNCA exceda a largura útil de 170mm.
+
+═══════════════════════════════════════════════
+REGRAS DE QUEBRA DE PÁGINA
+═══════════════════════════════════════════════
+- h1, h2, h3 NUNCA devem ficar órfãos no final da página. Use page-break-after: avoid.
+- O conteúdo após h2/h3 (p, ul, table) deve usar page-break-before: avoid.
+- Tabelas e figuras: page-break-inside: avoid.
+- Novo capítulo (H1) DEVE iniciar em nova página com <div class="page-break"></div> antes.
+
+═══════════════════════════════════════════════
+TIPOGRAFIA E HIERARQUIA VISUAL
+═══════════════════════════════════════════════
+- h2: 15pt bold, borda inferior 2px sólida cor-primaria, padding-bottom 2mm
+- h3: 11pt bold, cor-secundaria, borda esquerda 3px solid cor-accent, padding-left 3mm
+- h4: 10pt bold, cor texto
+- Diferença CLARA entre h2 e h3 obrigatória.
+
+═══════════════════════════════════════════════
+CALLOUTS / BLOCOS DE DESTAQUE
+═══════════════════════════════════════════════
+Use para recomendações, avisos e notas:
+- <div class="callout sucesso"> para recomendações (verde, borda esquerda #059669)
+- <div class="callout atencao"> para alertas (amarelo, borda esquerda #D97706)
+- <div class="callout perigo"> para riscos críticos (vermelho, borda esquerda #DC2626)
+- Cada callout contém: <p class="callout-titulo">TÍTULO</p><p class="callout-texto">conteúdo</p>
+
 REGRAS OBRIGATÓRIAS:
 - Diferencie FATO/HIPÓTESE/PREMISSA/ESTIMATIVA; segurança NR-12/ISO 12100 é condição de projeto.
 - Declare incertezas; não invente marcas; use premissas explícitas.
@@ -732,7 +789,7 @@ REGRAS OBRIGATÓRIAS:
 - No campo/seção Aplicação, NÃO repita o mini escopo. Faça uma análise resumida da necessidade real do cliente.
 - O documento deve ser COMPLETO — NÃO interrompa ou trunque o conteúdo. Gere TODAS as seções até o final incluindo assinaturas.
 - NÃO inclua seções sobre "Especificações de Diagramação", "Controle Executivo do Documento", "Motor de Diagramação", "Especificações de Geração de Imagens" ou qualquer instrução de formatação no corpo da proposta.
-- Na seção de Cronograma, use uma tabela detalhada com fases nas linhas e semanas nas colunas (S1, S2, ..., S10+), marcando células preenchidas para representar a duração de cada fase. Inclua coluna de descrição/marco ao lado.
+- Na seção de Cronograma, use uma tabela com <colgroup> e larguras fixas. Fases nas linhas e semanas/meses nas colunas, marcando células preenchidas com background colorido. Use font-size 7.5pt para Gantt.
 - Na seção de Riscos, inclua colunas: Nível (badge colorido BAIXO/MÉDIO/ALTO), Categoria, Descrição, Probabilidade, Impacto e Mitigação.
 - Na seção de ROI, inclua tabela com 3 cenários (Conservador, Base RECOMENDADO, Otimista) com CAPEX, Benefício Anual, Payback (meses) e Premissas.
 - Dados do representante da empresa proponente: Nome: ${representanteName || 'A ser designado'}, Cargo: ${representanteCargo || 'A ser designado'}.
