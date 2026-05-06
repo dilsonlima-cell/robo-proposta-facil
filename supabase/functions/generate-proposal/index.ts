@@ -302,6 +302,10 @@ function buildApplicationAnalysis(input: Record<string, string | undefined>): st
 
 function sanitizeProposal(html: string, formInput?: Record<string, string | undefined>): string {
   let result = html;
+
+  // 0. CRÍTICO: Strip markdown code fences (```html, ```, ~~~)
+  result = result.replace(/```[\w]*\n?|```/g, '');
+  result = result.replace(/~~~[\w]*\n?|~~~/g, '');
   
   // 1. Remove control characters (ASCII 0-31 except \n \r \t, and 127-159)
   result = result.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
