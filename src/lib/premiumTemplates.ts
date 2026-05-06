@@ -75,21 +75,111 @@ function buildContentPages(content: string, primaryColor: string, secondaryColor
         .proposal-body-pages .proposal-cover { display: none !important; }
         .proposal-body-pages .proposal-section, .proposal-body-pages .signature-block { background: #ffffff; }
         .proposal-body-pages .page-break { page-break-after: always; height: 0; }
-        .proposal-title { font-size: 18pt; font-weight: 700; color: ${primaryColor}; margin: 30px 0 12px; page-break-after: avoid; border-bottom: 2px solid ${primaryColor}20; padding-bottom: 8px; }
-        .proposal-subtitle { font-size: 14pt; font-weight: 600; color: ${secondaryColor}; margin: 20px 0 8px; page-break-after: avoid; }
+
+        /* ── QUEBRAS DE PÁGINA ── */
+        .no-break { page-break-inside: avoid; break-inside: avoid; }
+        .keep-with-next { page-break-after: avoid; break-after: avoid; }
+        h1, h2, h3 { page-break-after: avoid; break-after: avoid; }
+        h2 + p, h2 + ul, h2 + table, h2 + div,
+        h3 + p, h3 + ul, h3 + table, h3 + div {
+          page-break-before: avoid; break-before: avoid;
+        }
+
+        /* ── TIPOGRAFIA COM HIERARQUIA CLARA ── */
+        .proposal-title {
+          font-size: 18pt; font-weight: 700; color: ${primaryColor};
+          margin: 30px 0 12px; page-break-after: avoid;
+          border-bottom: 2px solid ${primaryColor}; padding-bottom: 8px;
+        }
+        .proposal-subtitle {
+          font-size: 14pt; font-weight: 600; color: ${secondaryColor};
+          margin: 20px 0 8px; page-break-after: avoid;
+        }
+        h3.proposal-subtitle, h3 {
+          font-size: 11pt; font-weight: 700; color: ${secondaryColor};
+          border-left: 3px solid ${primaryColor}; padding-left: 10px;
+          margin: 16px 0 8px;
+        }
+        h4 { font-size: 10pt; font-weight: 700; color: #333; margin: 12px 0 4px; }
         .proposal-text { margin: 0 0 10px; text-align: justify; }
         .proposal-list { margin: 8px 0 12px 20px; }
         .proposal-list li { margin: 4px 0; }
-        .proposal-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 9.5pt; }
-        .proposal-table thead { display: table-header-group; }
-        .proposal-table th { background: ${primaryColor}; color: white; padding: 8px 10px; text-align: left; font-weight: 600; }
-        .proposal-table td { padding: 7px 10px; border-bottom: 1px solid #e0e0e0; }
-        .proposal-table tr:nth-child(even) td { background: #f9f9f9; }
+
+        /* ── TABELAS COM LAYOUT FIXO (CRÍTICO) ── */
+        .proposal-table, table {
+          width: 100%; max-width: 100%;
+          border-collapse: collapse; margin: 12px 0;
+          font-size: 9.5pt;
+          table-layout: fixed;
+          page-break-inside: avoid; break-inside: avoid;
+        }
+        .proposal-table thead, table thead { display: table-header-group; }
+        .proposal-table th, table th {
+          background: ${primaryColor}; color: white;
+          padding: 8px 10px; text-align: left; font-weight: 600;
+          font-size: 8.5pt; vertical-align: middle;
+          word-wrap: break-word; overflow-wrap: break-word;
+        }
+        .proposal-table td, table td {
+          padding: 7px 10px; border-bottom: 1px solid #e0e0e0;
+          vertical-align: top;
+          word-wrap: break-word; overflow-wrap: break-word;
+          line-height: 1.4;
+        }
+        .proposal-table tr:nth-child(even) td, table tr:nth-child(even) td { background: #f5f7fa; }
+        .proposal-table tr:last-child td, table tr:last-child td { border-bottom: 2px solid ${primaryColor}; }
+
+        /* Tabela de destaque (ex: resumo de custos) */
+        .tabela-destaque tr:last-child td {
+          background: ${primaryColor}; color: white; font-weight: 700; font-size: 10pt;
+        }
+
+        /* ── GANTT / CRONOGRAMA ── */
+        .tabela-gantt th, .tabela-gantt td {
+          padding: 2mm 1mm; text-align: center; font-size: 7.5pt;
+          border: 1px solid #d0d0d0; height: 8mm;
+        }
+        .tabela-gantt td:first-child { text-align: left; padding-left: 2mm; }
+        .tabela-gantt .marco td { background: none !important; }
+        .tabela-gantt .marco .ativo::after { content: "◆"; color: #E8A020; font-size: 9pt; }
+        .gantt-cell { width: 28px; height: 20px; display: inline-block; }
+        .gantt-filled { background: ${secondaryColor}; border-radius: 3px; }
+
+        /* ── CALLOUTS / BLOCOS DE DESTAQUE ── */
+        .callout {
+          border-left: 4px solid ${primaryColor}; background: #f5f7fa;
+          padding: 14px 18px; margin: 14px 0; border-radius: 0 6px 6px 0;
+          page-break-inside: avoid; break-inside: avoid;
+        }
+        .callout-titulo {
+          font-size: 9pt; font-weight: 700; color: ${primaryColor};
+          text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
+        }
+        .callout-texto { font-size: 9.5pt; }
+        .callout.sucesso { border-color: #059669; background: #ECFDF5; }
+        .callout.sucesso .callout-titulo { color: #065F46; }
+        .callout.atencao { border-color: #D97706; background: #FFFBEB; }
+        .callout.atencao .callout-titulo { color: #92400E; }
+        .callout.perigo { border-color: #DC2626; background: #FEF2F2; }
+        .callout.perigo .callout-titulo { color: #991B1B; }
+
+        /* ── BADGES DE STATUS ── */
+        .badge {
+          display: inline-block; padding: 2px 8px; border-radius: 4px;
+          font-size: 7.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .badge-alto { background: #FDE8E8; color: #9B1C1C; }
+        .badge-medio { background: #FEF3C7; color: #92400E; }
+        .badge-baixo { background: #D1FAE5; color: #065F46; }
+
+        /* ── HIGHLIGHT BOXES ── */
         .highlight-box { padding: 14px 18px; border-radius: 8px; margin: 14px 0; border-left: 4px solid; page-break-inside: avoid; }
         .highlight-recommendation { background: #f0fdf4; border-color: #22c55e; }
         .highlight-risk { background: #fef2f2; border-color: #ef4444; }
         .highlight-info { background: #eff6ff; border-color: #3b82f6; }
         .highlight-warning { background: #fffbeb; border-color: #f59e0b; }
+
+        /* ── OUTROS ELEMENTOS ── */
         .cost-summary { background: #eff6ff; padding: 16px 20px; border-radius: 8px; margin: 14px 0; }
         .cost-total { font-size: 18pt; font-weight: 700; color: ${primaryColor}; text-align: center; margin-top: 10px; }
         .technical-card { background: #f5f5f5; padding: 14px; border-radius: 8px; margin: 8px 0; }
@@ -100,14 +190,23 @@ function buildContentPages(content: string, primaryColor: string, secondaryColor
         .proposal-section { margin-bottom: 8px; }
         h1.proposal-title { page-break-before: always; }
         h1.proposal-title:first-of-type { page-break-before: auto; }
-        /* Cronograma Gantt style matching reference */
-        .gantt-cell { width: 28px; height: 20px; display: inline-block; }
-        .gantt-filled { background: ${secondaryColor}; border-radius: 3px; }
+
+        /* ── NÚMERO DE SEÇÃO ── */
+        .section-number {
+          display: inline-block; background: ${primaryColor}; color: white;
+          font-size: 8pt; font-weight: 700; padding: 2px 8px;
+          border-radius: 4px; margin-right: 6px; vertical-align: middle;
+        }
+
         /* Risk matrix badges */
         .risk-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; color: white; font-size: 8pt; font-weight: 600; }
         .risk-baixo { background: #22c55e; }
         .risk-medio { background: ${secondaryColor}; }
         .risk-alto { background: #ef4444; }
+
+        /* Definition lists for specs */
+        dl { display: grid; grid-template-columns: 40% 1fr; gap: 2px 8px; margin: 8px 0; }
+        dt { font-weight: 700; color: ${primaryColor}; }
       </style>
       ${headerHtml}
       ${sanitized}
