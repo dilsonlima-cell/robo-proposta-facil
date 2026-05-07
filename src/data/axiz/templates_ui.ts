@@ -9,10 +9,7 @@ export const TEMPLATES_UI: TemplateUI[] = [
     id: 'classic-corporate',
     name: '01 Classic Corporate',
     html: `
-    html: `
       <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Open+Sans:wght@400;600;700&display=swap');
-        
         :root { --primary: {{primary}}; --secondary: {{secondary}}; }
         
         body { font-family: 'Open Sans', sans-serif; color: #1a1a1a; margin: 0; padding: 0; background: #f1f5f9; }
