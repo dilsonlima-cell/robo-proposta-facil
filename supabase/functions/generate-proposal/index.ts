@@ -21,17 +21,8 @@ interface ScopeClassification {
 function classifyScope(miniEscopo: string, peso: string, producao: string, automacao: string): ScopeClassification {
   const text = miniEscopo.toLowerCase();
   const pesoNum = parseFloat(peso || "0");
-  const producaoNum = parseFloat(producao || "0");
 
-  const isPintura = ["pintura", "cabine de pintura", "estufa", "primer", "topcoat", "paint kitchen", "e-coat", "eletrostática", "pó", "tinta", "revestimento"].some(k => text.includes(k));
-  const isLinha = ["linha", "linha completa", "sistema de pintura", "linha de pintura"].some(k => text.includes(k));
-
-  let tipo_projeto = "automacao_geral";
   let porte: ScopeClassification["porte"] = "nao_identificado";
-  let nivel_automacao: ScopeClassification["nivel_automacao"] = "padrao";
-  let subsistemas_obrigatorios: string[] = [];
-
-  if (isPintura) {
   if (text.includes("grande porte") || pesoNum >= 500) {
     porte = "grande";
   } else if (text.includes("pequeno porte") || (pesoNum > 0 && pesoNum < 50)) {
@@ -40,7 +31,6 @@ function classifyScope(miniEscopo: string, peso: string, producao: string, autom
     porte = "medio";
   }
 
-  // Detecção genérica de tipo de projeto
   let tipo_projeto = "automacao_industrial";
   if (["pintura", "cabine", "estufa", "tinta", "revestimento", "primer"].some(k => text.includes(k))) {
     tipo_projeto = "sistema_de_superficies";
@@ -54,7 +44,6 @@ function classifyScope(miniEscopo: string, peso: string, producao: string, autom
     tipo_projeto = "soldagem_robotizada";
   }
 
-  // Nível de automação genérico
   let nivel_automacao: ScopeClassification["nivel_automacao"] = "padrao";
   if (automacao?.toLowerCase().includes("totalmente") || text.includes("alta performance")) {
     nivel_automacao = "alta_performance";
@@ -62,7 +51,10 @@ function classifyScope(miniEscopo: string, peso: string, producao: string, autom
     nivel_automacao = "manual";
   }
 
-  return { tipo_projeto, porte, nivel_automacao };
+  const isPintura = ["pintura", "cabine de pintura", "estufa", "primer", "topcoat", "paint kitchen", "e-coat", "eletrostática", "pó", "tinta", "revestimento"].some(k => text.includes(k));
+  const subsistemas_obrigatorios: string[] = [];
+
+  return { tipo_projeto, porte, nivel_automacao, is_linha_pintura_industrial: isPintura, subsistemas_obrigatorios };
 }
 
 // ============================================================
