@@ -456,7 +456,8 @@ export const ProposalDetails = () => {
                   client: proposal.cliente,
                   project: proposal.titulo,
                   valor: formatCurrency(proposal.content?.bom?.resumo_consolidado?.preco_total_final || 0),
-                  date: new Date(proposal.created_at).toLocaleDateString('pt-BR')
+                  date: new Date(proposal.created_at).toLocaleDateString('pt-BR'),
+                  dossieContent: doc.dossie_html
                 }}
                 initialDesign={{
                   template_id: proposal.content?.meta?.template_id || 'classic-corporate',

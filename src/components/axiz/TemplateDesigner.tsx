@@ -17,6 +17,7 @@ interface Props {
     project: string;
     valor: string;
     date: string;
+    dossieContent?: string;
   };
   initialDesign?: {
     template_id: string;
@@ -61,6 +62,7 @@ export const TemplateDesigner: React.FC<Props> = ({ initialData, initialDesign, 
     html = html.replace(/{{date}}/g, date);
     html = html.replace(/{{primary}}/g, primaryColor);
     html = html.replace(/{{secondary}}/g, secondaryColor);
+    html = html.replace(/{{content}}/g, initialData.dossieContent || '<div style="padding: 40px; text-align: center; color: #999;">Aguardando geração do conteúdo técnico...</div>');
 
     const doc = previewRef.current.contentDocument || previewRef.current.contentWindow?.document;
     if (doc) {

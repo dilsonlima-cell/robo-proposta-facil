@@ -1115,8 +1115,39 @@ REGRAS OBRIGATÓRIAS:
 - Empresa proponente: ${companyName || 'Leve Brisa'}. Validade: ${validadeDias || '60'} dias.
 - Data de emissão (usar em TODOS os lugares): ${new Date().toLocaleDateString("pt-BR")}.
 
-FORMATO OBRIGATÓRIO: HTML sem markdown. Inclua <div class="proposal-cover"> com cover-title, cover-subtitle e cover-meta; <div class="page-break"></div> entre seções; h1.proposal-title; h2/h3.proposal-subtitle; p.proposal-text; ul/ol.proposal-list; table.proposal-table; highlight-box recommendation/risk/info/warning; cost-summary; signature-block no final com nomes e cargos preenchidos.
-Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas (MATRIZ OBRIGATÓRIA), 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo/Cronograma, 10 Riscos (MATRIZ), 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 ROI (3 cenários), 14 Fechamento, 15 Assinaturas (com nomes preenchidos). Ajuste profundidade à versão.`;
+FORMATO OBRIGATÓRIO: Retorne EXCLUSIVAMENTE um objeto JSON (sem markdown, sem blocos \`\`\`json) com a seguinte estrutura:
+{
+  "resumo_executivo": {
+    "investimento_resumo": "R$ ...",
+    "prazo_resumo": "... dias",
+    "contexto": "Breve descrição do contexto operacional",
+    "diagnostico_tecnico": {
+      "causa_raiz": "Descrição da causa raiz",
+      "descricao": "Parecer técnico detalhado",
+      "impactos": [{"descricao": "Impacto X", "gravidade": "Alta|Média|Baixa"}]
+    }
+  },
+  "alternativas": {
+    "basica": { "posicionamento": "Conservadora", "descricao": "...", "investimento": "R$ ...", "prazo": "...", "pros": ["Vantagem 1", "Vantagem 2"] },
+    "intermediaria": { "posicionamento": "Performance", "descricao": "...", "investimento": "R$ ...", "prazo": "...", "pros": ["Vantagem 1", "Vantagem 2"] },
+    "premium": { "posicionamento": "Indústria 4.0", "descricao": "...", "investimento": "R$ ...", "prazo": "...", "pros": ["Vantagem 1", "Vantagem 2"] }
+  },
+  "analise_tecnica": {
+    "descricao_solucao": "Descrição técnica detalhada da solução",
+    "normas_aplicaveis": ["NR-12", "ISO 12100", ...],
+    "tecnologias_utilizadas": ["CLP Siemens", "Robótica KUKA", ...]
+  },
+  "bom": {
+    "itens": [{"descricao": "Item 1", "quantidade": 1, "preco_unitario": 0, "total": 0}],
+    "resumo_consolidado": { "preco_total_final": 0 }
+  },
+  "roi": {
+    "cenarios": [{"nome": "Conservador", "capex": 0, "beneficio_anual": 0, "payback_meses": 0, "premissas": "..."}]
+  },
+  "dossie_html": "O DOCUMENTO COMPLETO FORMATADO PARA A4 (conforme as 15 seções solicitadas, incluindo placeholders <<IMAGEM:NAME>> e tabelas Gantt/Riscos/ROI em HTML puro)."
+}
+
+Importante: O campo 'dossie_html' deve conter toda a proposta textual rica, formatada com as classes CSS solicitadas (proposal-title, highlight-box, etc.). No campo 'dossie_html', NÃO use markdown, use apenas tags HTML. Estrutura do HTML: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas (MATRIZ), 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo/Cronograma, 10 Riscos (MATRIZ), 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 ROI, 14 Fechamento, 15 Assinaturas.`;
 
     const requestBody = {
       model: "google/gemini-2.5-flash",
@@ -1144,23 +1175,39 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas (MATRIZ OBRI
       proposal += continuation;
     }
 
-    proposal = sanitizeProposal(proposal || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents), fallbackInput);
-
-    // Generate AI images for <<IMAGEM:...>> placeholders
+    // Parse JSON
+    let proposalData;
     try {
-      proposal = await generateAndReplaceImages(
-        proposal,
-        LOVABLE_API_KEY,
-        projectTitle || "Projeto Industrial",
-        miniEscopo || ""
-      );
-    } catch (imgErr) {
-      console.error("Image generation error (non-fatal):", imgErr);
-      // Remove any remaining placeholders gracefully
-      proposal = proposal.replace(/<<IMAGEM:[^>]+>>/g, '');
+      // Remove possible markdown block wraps if AI ignored instructions
+      const jsonStr = proposal.replace(/```json|```/g, '').trim();
+      proposalData = JSON.parse(jsonStr);
+    } catch (parseErr) {
+      console.error("JSON Parse Error:", parseErr);
+      // Fallback: If not JSON, wrap the raw response as dossie_html
+      proposalData = {
+        dossie_html: sanitizeProposal(proposal, fallbackInput),
+        resumo_executivo: { contexto: "Ocorreu um erro na estruturação dos dados, mas o dossiê completo foi gerado." }
+      };
     }
 
-    return new Response(JSON.stringify({ proposal }), {
+    if (proposalData.dossie_html) {
+      proposalData.dossie_html = sanitizeProposal(proposalData.dossie_html, fallbackInput);
+      
+      // Generate AI images for <<IMAGEM:...>> placeholders in the HTML
+      try {
+        proposalData.dossie_html = await generateAndReplaceImages(
+          proposalData.dossie_html,
+          LOVABLE_API_KEY,
+          projectTitle || "Projeto Industrial",
+          miniEscopo || ""
+        );
+      } catch (imgErr) {
+        console.error("Image generation error (non-fatal):", imgErr);
+        proposalData.dossie_html = proposalData.dossie_html.replace(/<<IMAGEM:[^>]+>>/g, '');
+      }
+    }
+
+    return new Response(JSON.stringify({ proposal: proposalData }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
