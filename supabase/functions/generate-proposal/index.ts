@@ -414,6 +414,37 @@ function buildApplicationAnalysis(input: Record<string, string | undefined>): st
   return `A necessidade central do cliente é transformar o ${process} em uma solução tecnicamente controlada, segura e escalável para ${part}, alinhando ${production}, ${automation} e condições de ${environment}. A aplicação deve reduzir dependências operacionais, estabilizar repetibilidade, preservar conformidade de segurança e criar uma base confiável para qualidade, manutenção e expansão futura. O foco da proposta, portanto, não é apenas fornecer um equipamento ou serviço, mas estruturar uma solução que resolva a necessidade de negócio declarada: ${goal}.`;
 }
 
+function validateProposalIntegrity(html: string): string[] {
+  const warnings: string[] = [];
+  const lowerHtml = html.toLowerCase();
+
+  // 1. Check for textual graphs (SPEC v3.0 prohibits ■)
+  if (html.includes('■') || html.includes('█')) {
+    warnings.push("Gráfico de caracteres detectado e bloqueado conforme SPEC v3.0.");
+  }
+
+  // 2. Check for missing critical structures
+  if (!lowerHtml.includes('signature-block') && !lowerHtml.includes('assinaturas')) {
+    warnings.push("Bloco de assinaturas não identificado.");
+  }
+
+  if (!lowerHtml.includes('footer-meta')) {
+    warnings.push("Metadados de rodapé ausentes.");
+  }
+
+  // 3. Check for length vs premium expectations
+  if (html.length < 3000) {
+    warnings.push("Conteúdo técnico abaixo do limite de densidade industrial esperado.");
+  }
+
+  // 4. Check for forbidden terms (IA/Agents) - although sanitized, we check if they are still there
+  if (/\bIA\b|\bagente\b/i.test(html)) {
+    warnings.push("Resquícios de terminologia de IA detectados.");
+  }
+
+  return warnings;
+}
+
 function sanitizeProposal(html: string, formInput?: Record<string, string | undefined>): string {
   let result = html;
 
@@ -421,64 +452,41 @@ function sanitizeProposal(html: string, formInput?: Record<string, string | unde
   result = result.replace(/```[\w]*\n?|```/g, '');
   result = result.replace(/~~~[\w]*\n?|~~~/g, '');
   
-  // 1. Remove control characters (ASCII 0-31 except \n \r \t, and 127-159)
+  // 1. Remove control characters and zero-width chars
   result = result.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
-  // Remove zero-width chars
   result = result.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
-  // Remove sequences of extended latin chars that indicate encoding corruption
-  result = result.replace(/[¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ]{5,}/g, '');
   
-  // 2. Replace AI/agent terms
+  // 2. Protect SPEC v3.0 structures (Tables & Head)
+  if (result.includes('<table') && !result.includes('<thead')) {
+    result = result.replace(/(<table[^>]*>)\s*(<tr>\s*<th)/gi, '$1<thead>$2');
+    result = result.replace(/(<\/th>\s*<\/tr>)\s*(<tr>\s*<td>)/gi, '$1</thead><tbody>$2');
+    result = result.replace(/(<\/td>\s*<\/tr>)\s*(<\/table>)/gi, '$1</tbody>$2');
+  }
+
+  // 3. Replace AI/agent terms
   result = result
     .replace(/gerad[ao]s? automaticamente/gi, "elaborado")
-    .replace(/geração automática/gi, "elaboração")
     .replace(/inteligência artificial/gi, "engenharia consultiva")
     .replace(/\bIA\b/g, "engenharia consultiva")
     .replace(/\bagentes?\b/gi, "especialistas")
-    .replace(/metadados internos[^<.]*/gi, "")
-    .replace(/prompt[^<.]*/gi, "diretriz técnica")
-    .replace(/modo resiliente[^<.]*/gi, "premissas iniciais")
-    .replace(/timeout de processamento/gi, "validação técnica complementar")
-    .replace(/sistema automatizado/gi, "equipe técnica")
-    .replace(/modelo de linguagem/gi, "metodologia analítica");
-
-  // 3. Remove unwanted sections (platform-internal)
-  const unwantedPatterns = [
-    /(<div[^>]*>[\s\S]*?)?<h[1-3][^>]*>[^<]*(Especifica[çc][õo]es de Diagrama[çc][ãa]o|Controle Executivo do Documento|Motor de Diagrama[çc][ãa]o|Especifica[çc][õo]es de Gera[çc][ãa]o de Imagens)[^<]*<\/h[1-3]>[\s\S]*?(?=<h[1-3]|<div class="page-break"|<div class="signature-block"|$)/gi,
-  ];
-  for (const regex of unwantedPatterns) {
-    result = result.replace(regex, "");
-  }
+    .replace(/[■█]/g, ""); // Remove chart characters if they got through
 
   // 4. Fill signature placeholders with form data
   if (formInput) {
     const repName = formInput.representanteName || "A ser designado";
-    const repCargo = formInput.representanteCargo || "A ser designado";
-    const clientRep = formInput.clientRepName || "A ser designado";
-    const clientCargo = formInput.clientRepCargo || "A ser designado";
+    const repCargo = formInput.representanteCargo || "Engenheiro Responsável";
+    const clientRep = formInput.clientRepName || "Representante do Cliente";
+    const clientCargo = formInput.clientRepCargo || "Gestor de Contratos";
     const today = new Date().toLocaleDateString("pt-BR");
-    const todayLong = new Date().toLocaleDateString("pt-BR", { day: '2-digit', month: 'long', year: 'numeric' });
     
-    // Replace placeholder patterns
-    result = result.replace(/\[Nome do Representante[^\]]*\]/gi, repName);
-    result = result.replace(/\[Cargo do Representante[^\]]*\]/gi, repCargo);
+    result = result.replace(/\[Nome do Representante[^\]]*\]|\[Nome do Proponente\]/gi, repName);
+    result = result.replace(/\[Cargo do Representante[^\]]*\]|\[Cargo do Proponente\]/gi, repCargo);
     result = result.replace(/\[Nome[^\]]*Cliente[^\]]*\]/gi, clientRep);
     result = result.replace(/\[Cargo[^\]]*Cliente[^\]]*\]/gi, clientCargo);
     result = result.replace(/\[Data[^\]]*\]/gi, today);
     result = result.replace(/\[CREA[^\]]*\]/gi, repCargo);
-    // Replace any remaining bracket placeholders
-    result = result.replace(/\[[A-ZÀ-Ú][^\]]{3,60}\]/g, "A ser designado");
-    
-    // Fix inconsistent dates - replace any date that doesn't match today
-    result = result.replace(/\d{1,2}\s+de\s+\w+\s+de\s+20\d{2}/gi, todayLong);
   }
   
-  // 5. Remove orphaned figure references (but keep <<IMAGEM:...>> for image generation step)
-  // <<IMAGEM:...>> placeholders are handled by generateAndReplaceImages()
-  result = result.replace(/Figura\s+\d+\.\d+[^<]*(?=<)/gi, (match) => {
-    return '';
-  });
-
   return result;
 }
 
@@ -998,20 +1006,17 @@ SEÇÃO DE ASSINATURAS (sempre incluir ao final):
 NÃO use markdown (**, ##, etc). Use HTML puro com as classes acima.
 Insira <div class="page-break"></div> entre cada seção principal para diagramação A4 correta.
 
-REGRAS FINAIS:
-- Linguagem técnica + comercial equilibrada, em português brasileiro
-- Não inventar marcas ou fabricantes
-- Clareza e objetividade
-- Segurança como CONDIÇÃO de projeto, não acessório
-- Declarar incertezas e dados faltantes explicitamente
-- Cada especialidade técnica DEVE contribuir com conteúdo específico (NÃO mencione "agente" no documento)
-- A profundidade DEVE ser proporcional à versão selecionada
-- NUNCA inventar especificações sem base
-- NUNCA tratar estimativa como valor fechado
-- Priorizar solução mais simples que atende todos os requisitos
-- Aplicar hierarquia de decisão em toda recomendação
-- Considerar ciclo de vida completo
-- Sinalizar riscos em 7 dimensões quando aplicável`;
+REGRAS FINAIS (SPEC v3.0 NEUTRA):
+- Linguagem técnica + comercial premium, em português brasileiro.
+- Independência de segmento: o motor gera para QUALQUER indústria.
+- NUNCA use caracteres "■" ou texto para gráficos de cronograma. Use SEMPRE tabelas <table>.
+- Fontes OBRIGATÓRIAS: Montserrat para Títulos (H1, H2), Open Sans para Texto e Tabelas.
+- TABELAS: thead { display: table-header-group; } para repetição automática de cabeçalho.
+- CALLOUTS: Use classes coloridas (sucesso, atencao, perigo, info, laranja, verde, amarelo).
+- ASSINATURAS: Estrutura rígida. NUNCA use "A ser designado" se os dados foram fornecidos.
+- RODAPÉ: Inclua metadados de geração em todas as seções.
+- MARGENS A4: Topo 25mm, Demais 20mm.
+- SANITIZAÇÃO: Garantir UTF-8 e ausência de caracteres corrompidos em matrizes de risco.`;
 
     const userPrompt = `DADOS DO PROJETO:
 Cliente: ${clientName || "Não informado"}
@@ -1020,96 +1025,56 @@ Tipo de Documento: ${initialObjective || "Proposta Técnica e Comercial"}
 Versão: ${proposalVersion || "Normal"}
 
 Mini Escopo / Descrição da Aplicação: ${miniEscopo}
-Produção desejada: ${producao || "Não informada"} peças/hora
-Descrição da peça: ${peca || "Não informada"}
-Peso da peça: ${peso || "Não informado"} kg
-Dimensões: ${dimensoes || "Não informadas"}
-Ambiente: ${ambiente || "Industrial normal"}
+Produção desejada: ${producao || "Não informada"}
+Peça/Produto: ${peca || "Não informada"}
 Nível de automação: ${automacao || "Não informado"}
-Processo atual: ${processoAtual || "Não informado"}
 Objetivo do projeto: ${objetivo || "Aumentar produtividade e reduzir custos"}
-Observações: ${observacoes || "Nenhuma"}
 
-CAMPOS ADICIONAIS (Categoria A — v2.0):
-Requisitos especiais de processo: ${requisitosEspeciais || "Não informado"}
-Materiais/Insumos críticos: ${insumosMateriais || "Não informado"}
-Nível de segurança funcional requerido: ${nivelSeguranca || "NR-12 padrão"}
-Integração com MES/ERP: ${integracaoMes || "Não definido"}
+DADOS DE ASSINATURA:
+Proponente: ${representanteName || 'Nome do Proponente'}, Cargo: ${representanteCargo || 'Cargo'}
+Cliente: ${clientRepName || 'Nome do Cliente'}, Cargo: ${clientRepCargo || 'Cargo'}
+Empresa Proponente: ${companyName || 'Axiz Studio'}
 
-${missingCatA.length > 0 ? `⚠️ ATENÇÃO — CAMPOS CATEGORIA A AUSENTES: ${missingCatA.join("; ")}. Use os proxies definidos no contexto de escopo e insira o callout PREMISSA CRÍTICA obrigatoriamente na Seção 2.` : "✅ Todos os campos Categoria A informados."}
+${missingCatA.length > 0 ? `⚠️ ATENÇÃO: Campos críticos ausentes: ${missingCatA.join("; ")}. Insira obrigatoriamente um Callout AMARELO (atencao) na Seção 2 com o título "PREMISSA CRÍTICA".` : ""}
 
-Gere o documento completo conforme as instruções do sistema, respeitando rigorosamente o DNA Mestre, a hierarquia de decisão, as regras de diagramação A4 profissional e as REGRAS DE VALIDAÇÃO INVIOLÁVEIS definidas no contexto de escopo. Insira quebras de página (<div class="page-break"></div>) entre as seções principais para garantir paginação correta no PDF.`;
+Gere o documento completo respeitando a SPEC v3.0 NEUTRA. Use <div class="page-break"></div> entre capítulos.`;
 
-    const compactSystemPrompt = `Você redige documentos executivos de engenharia industrial em HTML puro, português brasileiro, com precisão técnica e persuasão comercial.
-Especialidades técnicas consideradas internamente, sem qualquer menção no texto final:\n${specialtyContext}\n\n${versionInstructions}
-${scopeEnhancement}
+    const compactSystemPrompt = `Você é um motor de geração de documentos industriais de alta fidelidade (A4).
 
 ═══════════════════════════════════════════════
-REGRA 0 — FORMATO DE SAÍDA (CRÍTICO)
+REGRAS DE LAYOUT E DIAGRAMAÇÃO (SPEC v3.0)
 ═══════════════════════════════════════════════
-- Retorne APENAS o código HTML puro, sem nenhum texto antes ou depois.
-- NUNCA use delimitadores de bloco de código Markdown (\`\`\`html, \`\`\`, ~~~).
-- Não inclua explicações, comentários fora do HTML, nem preamble.
-- O output começa com a primeira tag HTML e termina com a última. Nada mais.
+1. FONTES: Títulos: Montserrat. Corpo: Open Sans.
+2. TABELAS: Use <thead> para que o cabeçalho se repita em todas as páginas. table-layout: fixed.
+3. CRONOGRAMA: PROIBIDO caracteres de texto. Use Tabela com colunas: Fase, Descrição, Duração (Semanas), Responsável, Intervalo (Ex: Semanas 1-4).
+4. CALLOUTS (OBRIGATÓRIO):
+   - <div class="callout amarela"> (Premissas Críticas)
+   - <div class="callout verde"> (Recomendações / ROI)
+   - <div class="callout vermelha"> (Riscos de Segurança / Alto Impacto)
+   - <div class="callout azul"> (Observações de Custo)
+   - <div class="callout laranja"> (Pendências / Dados a Confirmar)
+5. ASSINATURAS: Bloco estruturado com linhas de assinatura para Proponente, Cliente e 2 Testemunhas.
+6. METADADOS: Rodapé em todas as seções: "Proposta Axiz v3.0 • Doc ${Math.random().toString(36).substr(2, 9).toUpperCase()} • ${new Date().toLocaleDateString("pt-BR")} • Página X de Y".
 
 ═══════════════════════════════════════════════
-REGRAS DE CSS OBRIGATÓRIAS PARA TABELAS
+REGRAS ALGORÍTMICAS
 ═══════════════════════════════════════════════
-TODAS as tabelas DEVEM usar:
-- table-layout: fixed (CRÍTICO: força colunas dentro da largura)
-- word-wrap: break-word e overflow-wrap: break-word em td e th
-- Zebra-striping: tr:nth-child(even) td { background: #f5f7fa; }
-- Última linha: tr:last-child td { border-bottom: 2px solid cor-primaria; }
-- Badges de status: <span class="badge badge-alto/medio/baixo">ALTO</span>
+- CAPEX: Use referências industriais realistas.
+- CONTINGÊNCIA: Aplique 5-20% sobre o SUBTOTAL TÉCNICO, nunca sobre o total com impostos.
+- SOFTWARE: Mínimo 40h de engenharia por equipamento principal.
+- SEGURANÇA: NR-12 e ISO 12100 são mandatórios em qualquer projeto de máquina.
 
 ═══════════════════════════════════════════════
-REGRA CRONOGRAMA/GANTT (CRÍTICO)
+FORMATO DE SAÍDA (JSON OBRIGATÓRIO)
 ═══════════════════════════════════════════════
-- ATÉ 12 semanas: use colunas S1-S12 com font-size 7.5pt, coluna Fase com width 35mm, demais ~11mm cada.
-- MAIS DE 12 semanas: AGRUPE por meses (Mês 1, Mês 2...) com no máximo 6 colunas de tempo.
-- SEMPRE use <colgroup> com larguras fixas.
-- Células ativas: background com cor-secundaria do template.
-- NUNCA exceda a largura útil de 170mm.
-
-═══════════════════════════════════════════════
-REGRAS DE QUEBRA DE PÁGINA
-═══════════════════════════════════════════════
-- h1, h2, h3 NUNCA devem ficar órfãos no final da página. Use page-break-after: avoid.
-- O conteúdo após h2/h3 (p, ul, table) deve usar page-break-before: avoid.
-- Tabelas e figuras: page-break-inside: avoid.
-- Novo capítulo (H1) DEVE iniciar em nova página com <div class="page-break"></div> antes.
-
-═══════════════════════════════════════════════
-TIPOGRAFIA E HIERARQUIA VISUAL
-═══════════════════════════════════════════════
-- h2: 15pt bold, borda inferior 2px sólida cor-primaria, padding-bottom 2mm
-- h3: 11pt bold, cor-secundaria, borda esquerda 3px solid cor-accent, padding-left 3mm
-- h4: 10pt bold, cor texto
-- Diferença CLARA entre h2 e h3 obrigatória.
-
-═══════════════════════════════════════════════
-CALLOUTS / BLOCOS DE DESTAQUE
-═══════════════════════════════════════════════
-Use para recomendações, avisos e notas:
-- <div class="callout sucesso"> para recomendações (verde, borda esquerda #059669)
-- <div class="callout atencao"> para alertas (amarelo, borda esquerda #D97706)
-- <div class="callout perigo"> para riscos críticos (vermelho, borda esquerda #DC2626)
-- Cada callout contém: <p class="callout-titulo">TÍTULO</p><p class="callout-texto">conteúdo</p>
-
-REGRAS OBRIGATÓRIAS:
-- Diferencie FATO/HIPÓTESE/PREMISSA/ESTIMATIVA; segurança NR-12/ISO 12100 é condição de projeto.
-- Declare incertezas; não invente marcas; use premissas explícitas.
-- OBRIGATÓRIO: Gere SEMPRE uma MATRIZ COMPARATIVA com no mínimo 3 rotas (Conservadora, Intermediária, Otimizada) incluindo CAPEX, OPEX, produção/hora, payback e OEE estimado em tabela comparativa.
-- Sinalize riscos operacionais, elétricos, cibernéticos, dados, qualidade, prazo e integração.
-- É PROIBIDO usar ou sugerir termos como agente, agentes, IA, inteligência artificial, gerado automaticamente, geração automática, sistema automatizado, modelo, prompt, metadados, bastidores, processamento ou qualquer referência ao modo de elaboração.
-- O documento deve soar como uma proposta redigida por uma equipe humana de engenharia consultiva, com autoridade técnica e linguagem comercial premium.
-- No campo/seção Aplicação, NÃO repita o mini escopo. Faça uma análise resumida da necessidade real do cliente.
-- O documento deve ser COMPLETO — NÃO interrompa ou trunque o conteúdo. Gere TODAS as seções até o final incluindo assinaturas.
-- IMAGENS TÉCNICAS: Inclua placeholders <<IMAGEM:NOME>> em pontos estratégicos da proposta (ex: <<IMAGEM:LAYOUT_SOLUCAO>>, <<IMAGEM:FLUXO_PROCESSO>>, <<IMAGEM:ARQUITETURA_AUTOMACAO>>). Use nomes descritivos em MAIÚSCULAS com underscores. Inclua 2-4 placeholders nas seções de Escopo Técnico, Solução Recomendada e Etapas. As imagens serão geradas automaticamente.
-- NÃO inclua seções sobre "Especificações de Diagramação", "Controle Executivo do Documento", "Motor de Diagramação", "Especificações de Geração de Imagens" ou qualquer instrução de formatação no corpo da proposta.
-- Na seção de Cronograma, use uma tabela com <colgroup> e larguras fixas. Fases nas linhas e semanas/meses nas colunas, marcando células preenchidas com background colorido. Use font-size 7.5pt para Gantt.
-- Na seção de Riscos, inclua colunas: Nível (badge colorido BAIXO/MÉDIO/ALTO), Categoria, Descrição, Probabilidade, Impacto e Mitigação.
-- Na seção de ROI, inclua tabela com 3 cenários (Conservador, Base RECOMENDADO, Otimista) com CAPEX, Benefício Anual, Payback (meses) e Premissas.
+{
+  "resumo_executivo": { ... },
+  "alternativas": { ... },
+  "analise_tecnica": { ... },
+  "bom": { ... },
+  "roi": { ... },
+  "dossie_html": "HTML PURO sem markdown. Use as classes: proposal-title (H1), proposal-subtitle (H2), proposal-text, proposal-table, callout (com cores), signature-block, footer-meta."
+}`;
 - Dados do representante da empresa proponente: Nome: ${representanteName || 'A ser designado'}, Cargo: ${representanteCargo || 'A ser designado'}.
 - Dados do representante do cliente: Nome: ${clientRepName || 'A ser designado'}, Cargo: ${clientRepCargo || 'A ser designado'}.
 - Empresa proponente: ${companyName || 'Leve Brisa'}. Validade: ${validadeDias || '60'} dias.
@@ -1185,13 +1150,18 @@ Importante: O campo 'dossie_html' deve conter toda a proposta textual rica, form
       console.error("JSON Parse Error:", parseErr);
       // Fallback: If not JSON, wrap the raw response as dossie_html
       proposalData = {
-        dossie_html: sanitizeProposal(proposal, fallbackInput),
+        dossie_html: proposal,
         resumo_executivo: { contexto: "Ocorreu um erro na estruturação dos dados, mas o dossiê completo foi gerado." }
       };
     }
 
     if (proposalData.dossie_html) {
-      proposalData.dossie_html = sanitizeProposal(proposalData.dossie_html, fallbackInput);
+      proposalData.dossie_html = sanitizeProposal(proposalData.dossie_html, {
+        representanteName,
+        representanteCargo,
+        clientRepName,
+        clientRepCargo
+      });
       
       // Generate AI images for <<IMAGEM:...>> placeholders in the HTML
       try {
@@ -1207,7 +1177,12 @@ Importante: O campo 'dossie_html' deve conter toda a proposta textual rica, form
       }
     }
 
-    return new Response(JSON.stringify({ proposal: proposalData }), {
+    const integrityWarnings = validateProposalIntegrity(proposalData.dossie_html || "");
+
+    return new Response(JSON.stringify({ 
+      proposal: proposalData,
+      warnings: integrityWarnings
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

@@ -96,14 +96,20 @@ export const NewProject = () => {
       // Update proposal with result
       await supabase.from('proposals').update({
         content: result.proposal || '',
-        form_data: { ...mappedData, status: 'completed', progress: 100, current_stage: 'Concluído' }
+        form_data: { 
+          ...mappedData, 
+          status: 'awaiting_approval', 
+          progress: 100, 
+          current_stage: 'Revisão Técnica',
+          warnings: result.warnings || []
+        }
       }).eq('id', proposal.id);
       
       setIsSuccess(true);
       toast({ title: "Sucesso", description: "Proposta gerada com sucesso!" });
       
       setTimeout(() => {
-        window.location.href = '/axiz/dashboard';
+        window.location.href = `/axiz/proposal/${proposal.id}`;
       }, 1500);
     } catch (err: any) {
       console.error(err);

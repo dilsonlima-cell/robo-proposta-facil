@@ -144,7 +144,11 @@ const Index = () => {
       // Save to database history
       await saveToHistory(data, result.proposal);
 
-      if (result.warning) {
+      if (result.warnings && result.warnings.length > 0) {
+        result.warnings.forEach((w: string) => {
+          toast({ title: "QA Integridade", description: w, variant: "destructive" });
+        });
+      } else if (result.warning) {
         toast({ title: "Aviso", description: result.warning });
       }
     } catch (err: any) {

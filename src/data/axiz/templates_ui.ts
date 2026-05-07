@@ -9,36 +9,68 @@ export const TEMPLATES_UI: TemplateUI[] = [
     id: 'classic-corporate',
     name: '01 Classic Corporate',
     html: `
+    html: `
+      <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Open+Sans:wght@400;600;700&display=swap');
+        
         :root { --primary: {{primary}}; --secondary: {{secondary}}; }
-        body { font-family: 'Inter', sans-serif; color: #333; margin: 0; padding: 0; }
-        .page-cover { width: 210mm; height: 297mm; padding: 30mm; background: white; position: relative; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; page-break-after: always; }
+        
+        body { font-family: 'Open Sans', sans-serif; color: #1a1a1a; margin: 0; padding: 0; background: #f1f5f9; }
+        
+        /* A4 Page Setup */
+        .page-cover { width: 210mm; height: 297mm; padding: 30mm; background: white; position: relative; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; page-break-after: always; margin: 0 auto; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        
         .header { border-bottom: 4px solid var(--primary); padding-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
-        .logo { font-size: 28px; font-weight: 900; color: var(--primary); letter-spacing: -1px; }
+        .logo { font-family: 'Montserrat', sans-serif; font-size: 28px; font-weight: 900; color: var(--primary); letter-spacing: -1px; }
+        
         .content-cover { margin-top: 60px; }
-        .title { font-size: 42px; font-weight: 900; color: var(--primary); margin-bottom: 10px; line-height: 1; letter-spacing: -2px; }
-        .subtitle { font-size: 14px; color: var(--secondary); text-transform: uppercase; letter-spacing: 5px; font-weight: 700; opacity: 0.7; }
-        .footer-cover { border-top: 1px solid #eee; padding-top: 20px; display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
-        .meta-box { margin-top: 60px; background: #f8fafc; padding: 40px; border-radius: 30px; border: 1px solid #e2e8f0; }
+        .title { font-family: 'Montserrat', sans-serif; font-size: 42px; font-weight: 900; color: var(--primary); margin-bottom: 10px; line-height: 1.1; letter-spacing: -1px; }
+        .subtitle { font-family: 'Montserrat', sans-serif; font-size: 14px; color: var(--secondary); text-transform: uppercase; letter-spacing: 5px; font-weight: 700; opacity: 0.7; }
+        
+        .meta-box { margin-top: 60px; background: #f8fafc; padding: 40px; border-radius: 20px; border: 1px solid #e2e8f0; }
         .meta-item { margin-bottom: 25px; }
         .meta-item:last-child { margin-bottom: 0; }
         .meta-label { font-size: 9px; font-weight: 900; text-transform: uppercase; color: #64748b; letter-spacing: 1px; margin-bottom: 5px; }
         .meta-value { font-size: 18px; font-weight: 700; color: #0f172a; }
         
+        .footer-cover { border-top: 1px solid #eee; padding-top: 20px; display: flex; justify-content: space-between; font-size: 10px; color: #94a3b8; font-weight: 800; text-transform: uppercase; }
+
         /* Dossier Body Styles */
-        .dossie-body { width: 210mm; margin: 0 auto; padding: 25mm 25mm; box-sizing: border-box; background: white; }
-        .proposal-title { font-size: 24pt; font-weight: 900; color: var(--primary); margin: 30pt 0 15pt; page-break-before: always; border-bottom: 4px solid var(--primary); padding-bottom: 10pt; text-transform: uppercase; }
-        .proposal-subtitle { font-size: 16pt; font-weight: 800; color: var(--secondary); margin: 20pt 0 10pt; border-left: 5pt solid var(--primary); padding-left: 15pt; }
-        .proposal-text { font-size: 11pt; line-height: 1.6; color: #334155; margin-bottom: 12pt; text-align: justify; }
-        .proposal-table { width: 100%; border-collapse: collapse; margin: 15pt 0; table-layout: fixed; }
-        .proposal-table th { background: #f1f5f9; color: #0f172a; font-weight: 800; text-transform: uppercase; font-size: 9pt; padding: 10pt; border: 1pt solid #e2e8f0; text-align: left; }
-        .proposal-table td { padding: 10pt; border: 1pt solid #e2e8f0; font-size: 10pt; vertical-align: top; word-wrap: break-word; }
-        .highlight-box { padding: 20pt; border-radius: 15pt; margin: 20pt 0; border-left: 6pt solid var(--primary); background: #f8fafc; }
-        .callout { padding: 15pt; border-radius: 12pt; margin: 15pt 0; border-left: 5pt solid; }
-        .callout.sucesso { background: #ecfdf5; border-color: #10b981; color: #065f46; }
-        .callout.atencao { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
-        .callout.perigo { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+        .dossie-body { width: 210mm; margin: 0 auto; padding: 25mm 20mm; box-sizing: border-box; background: white; min-height: 297mm; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative; }
+        
+        h1, .proposal-title { font-family: 'Montserrat', sans-serif; font-size: 22pt; font-weight: 900; color: var(--primary); margin: 30pt 0 15pt; border-bottom: 3px solid var(--primary); padding-bottom: 8pt; text-transform: uppercase; page-break-before: always; }
+        h2, .proposal-subtitle { font-family: 'Montserrat', sans-serif; font-size: 16pt; font-weight: 800; color: var(--secondary); margin: 25pt 0 12pt; border-left: 5pt solid var(--primary); padding-left: 12pt; }
+        h3 { font-family: 'Montserrat', sans-serif; font-size: 13pt; font-weight: 700; color: #334155; margin: 18pt 0 10pt; }
+        
+        p, .proposal-text { font-family: 'Open Sans', sans-serif; font-size: 10.5pt; line-height: 1.6; color: #1e293b; margin-bottom: 12pt; text-align: justify; }
+        
+        /* Table Styles (SPEC v3.0) */
+        table, .proposal-table { width: 100%; border-collapse: collapse; margin: 15pt 0; table-layout: fixed; border: 1pt solid #e2e8f0; }
+        thead { display: table-header-group; }
+        th { background: #f8fafc; color: #0f172a; font-weight: 700; font-size: 9pt; padding: 10pt; border: 1pt solid #e2e8f0; text-align: left; font-family: 'Montserrat', sans-serif; }
+        td { padding: 9pt; border: 1pt solid #e2e8f0; font-size: 9.5pt; vertical-align: top; word-wrap: break-word; font-family: 'Open Sans', sans-serif; }
+        tr:nth-child(even) td { background: #fbfcfe; }
+        
+        /* Callouts (SPEC v3.0) */
+        .callout { padding: 12pt 15pt; border-radius: 8pt; margin: 15pt 0; border-left: 5pt solid; page-break-inside: avoid; }
+        .callout.verde, .callout.sucesso { background: #ecfdf5; border-color: #10b981; color: #065f46; }
+        .callout.amarela, .callout.atencao { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+        .callout.vermelha, .callout.perigo { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+        .callout.azul, .callout.info { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+        .callout.laranja { background: #fff7ed; border-color: #f97316; color: #9a3412; }
+        
+        /* Signature Blocks */
+        .signature-block { margin-top: 40pt; display: grid; grid-template-columns: 1fr 1fr; gap: 40pt; page-break-inside: avoid; }
+        .sig-line { border-top: 1pt solid #475569; padding-top: 8pt; text-align: center; }
+        .sig-name { font-weight: 700; font-size: 10pt; color: #0f172a; }
+        .sig-cargo { font-size: 9pt; color: #64748b; }
+
+        /* Footers */
+        .footer-meta { position: absolute; bottom: 10mm; left: 20mm; right: 20mm; font-size: 8pt; color: #94a3b8; display: flex; justify-content: space-between; border-top: 0.5pt solid #e2e8f0; padding-top: 5pt; }
+        
         .page-break { page-break-after: always; }
       </style>
+      
       <div class="page-cover">
         <div class="header">
           <div class="logo">AXIZ STUDIO</div>
@@ -49,15 +81,16 @@ export const TEMPLATES_UI: TemplateUI[] = [
           <div class="title">{{project}}</div>
           <div class="meta-box">
             <div class="meta-item"><div class="meta-label">Cliente</div><div class="meta-value">{{client}}</div></div>
-            <div class="meta-item"><div class="meta-label">Investimento Global</div><div class="meta-value">{{valor}}</div></div>
+            <div class="meta-item"><div class="meta-label">ID de Controle</div><div class="meta-value">{{id}}</div></div>
             <div class="meta-item"><div class="meta-label">Emissão</div><div class="meta-value">{{date}}</div></div>
           </div>
         </div>
         <div class="footer-cover">
-          <div>© 2024 Axiz · Confidential</div>
-          <div>Capa</div>
+          <div>© {{year}} Axiz · Confidential · Proprietary Industrial Methodology</div>
+          <div>Capa de Documento</div>
         </div>
       </div>
+      
       <div class="dossie-body">
         {{content}}
       </div>
