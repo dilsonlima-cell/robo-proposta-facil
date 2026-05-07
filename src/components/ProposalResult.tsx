@@ -79,7 +79,7 @@ const ProposalResult = ({ content, formData, onContentChange }: ProposalResultPr
 
   const processContent = (html: string) => {
     return html.replace(
-      /<<IMAGEM:(\w+)>>/g,
+      /<<IMAGEM:([^>]+)>>/g,
       (_, name) =>
         `<div data-image-block="${name}" class="image-block-wrapper"><div class="image-placeholder" data-name="${name}"><span class="image-placeholder-icon">🖼</span><span>Clique para inserir imagem: ${name}</span></div></div>`
     );
