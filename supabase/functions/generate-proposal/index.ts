@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -20,17 +21,8 @@ interface ScopeClassification {
 function classifyScope(miniEscopo: string, peso: string, producao: string, automacao: string): ScopeClassification {
   const text = miniEscopo.toLowerCase();
   const pesoNum = parseFloat(peso || "0");
-  const producaoNum = parseFloat(producao || "0");
 
-  const isPintura = ["pintura", "cabine de pintura", "estufa", "primer", "topcoat", "paint kitchen", "e-coat", "eletrostática", "pó", "tinta", "revestimento"].some(k => text.includes(k));
-  const isLinha = ["linha", "linha completa", "sistema de pintura", "linha de pintura"].some(k => text.includes(k));
-
-  let tipo_projeto = "automacao_geral";
   let porte: ScopeClassification["porte"] = "nao_identificado";
-  let nivel_automacao: ScopeClassification["nivel_automacao"] = "padrao";
-  let subsistemas_obrigatorios: string[] = [];
-
-  if (isPintura) {
   if (text.includes("grande porte") || pesoNum >= 500) {
     porte = "grande";
   } else if (text.includes("pequeno porte") || (pesoNum > 0 && pesoNum < 50)) {
@@ -39,7 +31,6 @@ function classifyScope(miniEscopo: string, peso: string, producao: string, autom
     porte = "medio";
   }
 
-  // Detecção genérica de tipo de projeto
   let tipo_projeto = "automacao_industrial";
   if (["pintura", "cabine", "estufa", "tinta", "revestimento", "primer"].some(k => text.includes(k))) {
     tipo_projeto = "sistema_de_superficies";
@@ -53,7 +44,6 @@ function classifyScope(miniEscopo: string, peso: string, producao: string, autom
     tipo_projeto = "soldagem_robotizada";
   }
 
-  // Nível de automação genérico
   let nivel_automacao: ScopeClassification["nivel_automacao"] = "padrao";
   if (automacao?.toLowerCase().includes("totalmente") || text.includes("alta performance")) {
     nivel_automacao = "alta_performance";
@@ -61,7 +51,10 @@ function classifyScope(miniEscopo: string, peso: string, producao: string, autom
     nivel_automacao = "manual";
   }
 
-  return { tipo_projeto, porte, nivel_automacao };
+  const isPintura = ["pintura", "cabine de pintura", "estufa", "primer", "topcoat", "paint kitchen", "e-coat", "eletrostática", "pó", "tinta", "revestimento"].some(k => text.includes(k));
+  const subsistemas_obrigatorios: string[] = [];
+
+  return { tipo_projeto, porte, nivel_automacao, is_linha_pintura_industrial: isPintura, subsistemas_obrigatorios };
 }
 
 // ============================================================
@@ -482,10 +475,9 @@ function sanitizeProposal(html: string, formInput?: Record<string, string | unde
     result = result.replace(/\d{1,2}\s+de\s+\w+\s+de\s+20\d{2}/gi, todayLong);
   }
   
-  // 5. Remove orphaned figure references
-  result = result.replace(/<<IMAGEM:\w+>>/g, '');
+  // 5. Remove orphaned figure references (but keep <<IMAGEM:...>> for image generation step)
+  // <<IMAGEM:...>> placeholders are handled by generateAndReplaceImages()
   result = result.replace(/Figura\s+\d+\.\d+[^<]*(?=<)/gi, (match) => {
-    // Only remove if there's no actual image nearby
     return '';
   });
 
@@ -559,6 +551,189 @@ async function callAiGateway(LOVABLE_API_KEY: string, body: Record<string, unkno
   return readStreamingCompletion(response);
 }
 
+// ============================================================
+// IMAGE GENERATION — Generates technical illustrations via AI
+// and uploads to Supabase Storage, replacing placeholders
+// ============================================================
+async function generateAndReplaceImages(
+  html: string,
+  LOVABLE_API_KEY: string,
+  projectTitle: string,
+  miniEscopo: string
+): Promise<string> {
+  // Find all <<IMAGEM:NAME>> placeholders
+  const placeholderRegex = /<<IMAGEM:([^>]+)>>/g;
+  const matches: { full: string; name: string }[] = [];
+  let match;
+  while ((match = placeholderRegex.exec(html)) !== null) {
+    matches.push({ full: match[0], name: match[1] });
+  }
+
+  if (matches.length === 0) return html;
+
+  // Limit to 4 images max to avoid timeout
+  const toGenerate = matches.slice(0, 4);
+
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  let result = html;
+
+  for (const placeholder of toGenerate) {
+    try {
+      // Build a descriptive prompt based on the placeholder name and project context
+      const imagePrompt = buildImagePrompt(placeholder.name, projectTitle, miniEscopo);
+
+      console.log(`Generating image for: ${placeholder.name}`);
+
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image",
+          messages: [{ role: "user", content: imagePrompt }],
+          modalities: ["image", "text"],
+        }),
+      });
+
+      if (!response.ok) {
+        console.error(`Image generation failed for ${placeholder.name}: ${response.status}`);
+        // Replace with a styled placeholder div instead of removing
+        result = result.replace(
+          placeholder.full,
+          `<div class="image-placeholder-box" style="border:2px dashed #ccc;padding:20px;text-align:center;margin:16px 0;border-radius:8px;background:#f9f9f9;">
+            <p style="color:#666;font-style:italic;">📐 Ilustração Técnica: ${formatImageName(placeholder.name)}</p>
+            <p style="color:#999;font-size:0.85em;">Imagem a ser inserida na versão final do documento</p>
+          </div>`
+        );
+        continue;
+      }
+
+      const data = await response.json();
+      const imageData = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+
+      if (!imageData) {
+        console.error(`No image data returned for ${placeholder.name}`);
+        result = result.replace(
+          placeholder.full,
+          `<div class="image-placeholder-box" style="border:2px dashed #ccc;padding:20px;text-align:center;margin:16px 0;border-radius:8px;background:#f9f9f9;">
+            <p style="color:#666;font-style:italic;">📐 Ilustração Técnica: ${formatImageName(placeholder.name)}</p>
+            <p style="color:#999;font-size:0.85em;">Imagem a ser inserida na versão final do documento</p>
+          </div>`
+        );
+        continue;
+      }
+
+      // Extract base64 data and upload to storage
+      const base64Match = imageData.match(/^data:image\/(png|jpeg|jpg|webp);base64,(.+)$/);
+      if (!base64Match) {
+        console.error(`Invalid image data format for ${placeholder.name}`);
+        continue;
+      }
+
+      const imageFormat = base64Match[1] === "jpg" ? "jpeg" : base64Match[1];
+      const base64Content = base64Match[2];
+      const binaryData = Uint8Array.from(atob(base64Content), c => c.charCodeAt(0));
+
+      const fileName = `${Date.now()}_${placeholder.name.toLowerCase()}.${imageFormat === "jpeg" ? "jpg" : imageFormat}`;
+      const filePath = `generated/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("proposal-images")
+        .upload(filePath, binaryData, {
+          contentType: `image/${imageFormat}`,
+          upsert: true,
+        });
+
+      if (uploadError) {
+        console.error(`Upload error for ${placeholder.name}:`, uploadError);
+        // Use inline base64 as fallback
+        result = result.replace(
+          placeholder.full,
+          `<div style="text-align:center;margin:20px 0;">
+            <img src="${imageData}" alt="${formatImageName(placeholder.name)}" style="max-width:100%;max-height:400px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);" />
+            <p style="color:#666;font-size:0.85em;margin-top:8px;font-style:italic;">${formatImageName(placeholder.name)}</p>
+          </div>`
+        );
+        continue;
+      }
+
+      const { data: publicUrlData } = supabase.storage
+        .from("proposal-images")
+        .getPublicUrl(filePath);
+
+      const publicUrl = publicUrlData.publicUrl;
+
+      result = result.replace(
+        placeholder.full,
+        `<div style="text-align:center;margin:20px 0;">
+          <img src="${publicUrl}" alt="${formatImageName(placeholder.name)}" style="max-width:100%;max-height:400px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);" />
+          <p style="color:#666;font-size:0.85em;margin-top:8px;font-style:italic;">${formatImageName(placeholder.name)}</p>
+        </div>`
+      );
+
+      console.log(`Image generated and uploaded: ${publicUrl}`);
+    } catch (err) {
+      console.error(`Error generating image ${placeholder.name}:`, err);
+      result = result.replace(
+        placeholder.full,
+        `<div class="image-placeholder-box" style="border:2px dashed #ccc;padding:20px;text-align:center;margin:16px 0;border-radius:8px;background:#f9f9f9;">
+          <p style="color:#666;font-style:italic;">📐 Ilustração Técnica: ${formatImageName(placeholder.name)}</p>
+          <p style="color:#999;font-size:0.85em;">Imagem a ser inserida na versão final do documento</p>
+        </div>`
+      );
+    }
+  }
+
+  // Remove any remaining unprocessed placeholders (beyond the 4 limit)
+  result = result.replace(/<<IMAGEM:[^>]+>>/g, '');
+
+  return result;
+}
+
+function formatImageName(name: string): string {
+  return name
+    .replace(/_/g, " ")
+    .replace(/([A-Z])/g, " $1")
+    .trim()
+    .split(/\s+/)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function buildImagePrompt(imageName: string, projectTitle: string, miniEscopo: string): string {
+  const name = imageName.toUpperCase();
+
+  // Map common placeholder names to detailed technical prompts
+  const promptMap: Record<string, string> = {
+    LAYOUT_SOLUCAO: `Technical isometric 3D rendering of an industrial automation layout for: ${projectTitle}. Show equipment arrangement, conveyor systems, workstations, and material flow arrows on a factory floor plan. Professional engineering style, clean lines, labeled zones, light gray background, no text overlays.`,
+    CABINE_ROBOTIZADA: `Professional 3D rendering of an industrial robotic paint booth with articulated robot arm inside, conveyor system passing through, air filtration ducts on top, lighting panels. Industrial blue/gray color scheme, photorealistic engineering visualization.`,
+    TRANSPORTADOR: `Technical 3D illustration of an industrial overhead conveyor system (Power & Free) with hooks carrying parts through different process zones. Show track layout, drive units, and load/unload stations. Clean engineering visualization style.`,
+    ESTUFA: `Technical cross-section rendering of an industrial curing oven showing insulated walls, air circulation system with fans and ducts, heating elements, temperature zones, conveyor passing through. Engineering cutaway diagram style.`,
+    FLUXO_PROCESSO: `Professional process flow diagram showing industrial production stages with arrows, equipment icons, and control points. Clean infographic style with blue/gray color palette, no handwriting.`,
+    CRONOGRAMA: `Professional Gantt chart visualization showing project phases with colored bars, milestones marked with diamonds, timeline in weeks. Clean corporate style.`,
+    ARQUITETURA_AUTOMACAO: `Technical automation architecture diagram showing PLC, HMI, SCADA, sensors, actuators, and industrial network connections (Profinet/EtherCAT). Professional engineering schematic style.`,
+    CELULA_ROBOTIZADA: `3D rendering of a robotic workcell with industrial robot arm, safety fencing, part fixtures, tool changer, and safety sensors. Professional engineering visualization.`,
+    PAINT_KITCHEN: `Technical 3D rendering of an industrial paint kitchen showing mixing tanks, pumps, piping system, color change valves, and supply lines to paint booths. Clean industrial engineering style.`,
+    SISTEMA_FILTRAGEM: `Technical cutaway diagram of an industrial air filtration system showing pre-filters, bag filters, activated carbon stage, exhaust fan, and ductwork. Engineering cross-section style.`,
+  };
+
+  // Try exact match first
+  if (promptMap[name]) return promptMap[name];
+
+  // Try partial match
+  for (const [key, prompt] of Object.entries(promptMap)) {
+    if (name.includes(key) || key.includes(name)) return prompt;
+  }
+
+  // Generic prompt based on name and context
+  return `Professional technical 3D rendering or engineering diagram for "${formatImageName(imageName)}" in the context of: ${projectTitle}. ${miniEscopo ? `Project scope: ${miniEscopo.substring(0, 200)}` : ""}. Industrial engineering visualization style, clean and professional, suitable for a technical proposal document. No text overlays, photorealistic or clean vector style.`;
+}
+
 function generateFallbackProposal(input: Record<string, string | undefined>, selectedAgents: string): string {
   const today = new Date().toLocaleDateString("pt-BR");
   const docTitle = input.initialObjective === "Gerar Escopo Técnico" ? "ESCOPO TÉCNICO" : "PROPOSTA TÉCNICA E COMERCIAL";
@@ -597,7 +772,7 @@ serve(async (req) => {
     // === FASE 1: TIPAGEM DE ESCOPO OBRIGATÓRIA ===
     const scopeClass = classifyScope(miniEscopo || "", peso || "", producao || "", automacao || "");
     const missingCatA = getMissingCategoryAFields(fallbackInput);
-    const scopeEnhancement = buildScopeEnhancement(scopeClass, missingCatA, fallbackInput);
+    const scopeEnhancement = buildScopeEnhancement(scopeClass, missingCatA);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -932,6 +1107,7 @@ REGRAS OBRIGATÓRIAS:
 - O documento deve soar como uma proposta redigida por uma equipe humana de engenharia consultiva, com autoridade técnica e linguagem comercial premium.
 - No campo/seção Aplicação, NÃO repita o mini escopo. Faça uma análise resumida da necessidade real do cliente.
 - O documento deve ser COMPLETO — NÃO interrompa ou trunque o conteúdo. Gere TODAS as seções até o final incluindo assinaturas.
+- IMAGENS TÉCNICAS: Inclua placeholders <<IMAGEM:NOME>> em pontos estratégicos da proposta (ex: <<IMAGEM:LAYOUT_SOLUCAO>>, <<IMAGEM:FLUXO_PROCESSO>>, <<IMAGEM:ARQUITETURA_AUTOMACAO>>). Use nomes descritivos em MAIÚSCULAS com underscores. Inclua 2-4 placeholders nas seções de Escopo Técnico, Solução Recomendada e Etapas. As imagens serão geradas automaticamente.
 - NÃO inclua seções sobre "Especificações de Diagramação", "Controle Executivo do Documento", "Motor de Diagramação", "Especificações de Geração de Imagens" ou qualquer instrução de formatação no corpo da proposta.
 - Na seção de Cronograma, use uma tabela com <colgroup> e larguras fixas. Fases nas linhas e semanas/meses nas colunas, marcando células preenchidas com background colorido. Use font-size 7.5pt para Gantt.
 - Na seção de Riscos, inclua colunas: Nível (badge colorido BAIXO/MÉDIO/ALTO), Categoria, Descrição, Probabilidade, Impacto e Mitigação.
@@ -971,6 +1147,20 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas (MATRIZ OBRI
     }
 
     proposal = sanitizeProposal(proposal || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents), fallbackInput);
+
+    // Generate AI images for <<IMAGEM:...>> placeholders
+    try {
+      proposal = await generateAndReplaceImages(
+        proposal,
+        LOVABLE_API_KEY,
+        projectTitle || "Projeto Industrial",
+        miniEscopo || ""
+      );
+    } catch (imgErr) {
+      console.error("Image generation error (non-fatal):", imgErr);
+      // Remove any remaining placeholders gracefully
+      proposal = proposal.replace(/<<IMAGEM:[^>]+>>/g, '');
+    }
 
     return new Response(JSON.stringify({ proposal }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
