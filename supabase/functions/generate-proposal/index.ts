@@ -483,10 +483,9 @@ function sanitizeProposal(html: string, formInput?: Record<string, string | unde
     result = result.replace(/\d{1,2}\s+de\s+\w+\s+de\s+20\d{2}/gi, todayLong);
   }
   
-  // 5. Remove orphaned figure references
-  result = result.replace(/<<IMAGEM:\w+>>/g, '');
+  // 5. Remove orphaned figure references (but keep <<IMAGEM:...>> for image generation step)
+  // <<IMAGEM:...>> placeholders are handled by generateAndReplaceImages()
   result = result.replace(/Figura\s+\d+\.\d+[^<]*(?=<)/gi, (match) => {
-    // Only remove if there's no actual image nearby
     return '';
   });
 
