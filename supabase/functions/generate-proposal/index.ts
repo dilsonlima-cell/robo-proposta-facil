@@ -772,7 +772,7 @@ serve(async (req) => {
     // === FASE 1: TIPAGEM DE ESCOPO OBRIGATÓRIA ===
     const scopeClass = classifyScope(miniEscopo || "", peso || "", producao || "", automacao || "");
     const missingCatA = getMissingCategoryAFields(fallbackInput);
-    const scopeEnhancement = buildScopeEnhancement(scopeClass, missingCatA, fallbackInput);
+    const scopeEnhancement = buildScopeEnhancement(scopeClass, missingCatA);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
