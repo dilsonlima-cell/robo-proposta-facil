@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         heading: ['"Space Grotesk"', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
+        display: ['Poppins', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -23,14 +24,22 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        surface: "#ffffff",
+        "surface-variant": "#f1f5f9",
+        outline: "#e2e8f0",
+        "on-surface": "#1e293b",
+        "on-surface-variant": "#64748b",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
+          DEFAULT: "#0f172a", // Axiz Primary
           foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
+          DEFAULT: "#0284c7", // Axiz Blue
           foreground: "hsl(var(--secondary-foreground))",
         },
+        success: "#10b981",
+        warning: "#f59e0b",
+        error: "#ef4444",
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
@@ -61,6 +70,10 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      boxShadow: {
+        'premium': '0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -3px rgba(0, 0, 0, 0.02)',
+        'premium-hover': '0 20px 40px -10px rgba(0, 0, 0, 0.1), 0 8px 16px -4px rgba(0, 0, 0, 0.05)',
       },
       borderRadius: {
         lg: "var(--radius)",

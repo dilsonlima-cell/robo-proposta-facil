@@ -14,7 +14,6 @@ interface ScopeClassification {
   tipo_projeto: string;
   porte: "pequeno" | "medio" | "grande" | "nao_identificado";
   nivel_automacao: "manual" | "padrao" | "alta_performance";
-  is_linha_pintura_industrial: boolean;
   subsistemas_obrigatorios: string[];
 }
 
@@ -51,10 +50,9 @@ function classifyScope(miniEscopo: string, peso: string, producao: string, autom
     nivel_automacao = "manual";
   }
 
-  const isPintura = ["pintura", "cabine de pintura", "estufa", "primer", "topcoat", "paint kitchen", "e-coat", "eletrostática", "pó", "tinta", "revestimento"].some(k => text.includes(k));
   const subsistemas_obrigatorios: string[] = [];
 
-  return { tipo_projeto, porte, nivel_automacao, is_linha_pintura_industrial: isPintura, subsistemas_obrigatorios };
+  return { tipo_projeto, porte, nivel_automacao, subsistemas_obrigatorios };
 }
 
 // ============================================================
@@ -764,8 +762,8 @@ serve(async (req) => {
       producao, peca, peso, dimensoes, ambiente, automacao, processoAtual,
       objetivo, observacoes, representanteName, representanteCargo,
       clientRepName, clientRepCargo, companyName, validadeDias,
-      // Novos campos Categoria A — especificação v2.0
-      numCoresProducao, tipoTinta, nivelSeguranca, integracaoMes,
+      // Campos Genéricos Categoria A — especificação v2.0
+      requisitosEspeciais, insumosMateriais, nivelSeguranca, integracaoMes,
     } = fallbackInput;
     const selectedAgents = identifyAgents(miniEscopo || "");
 
@@ -1033,8 +1031,8 @@ Objetivo do projeto: ${objetivo || "Aumentar produtividade e reduzir custos"}
 Observações: ${observacoes || "Nenhuma"}
 
 CAMPOS ADICIONAIS (Categoria A — v2.0):
-Número de cores em produção: ${numCoresProducao || "Não informado"}
-Tipo de tinta: ${tipoTinta || "Não informado"}
+Requisitos especiais de processo: ${requisitosEspeciais || "Não informado"}
+Materiais/Insumos críticos: ${insumosMateriais || "Não informado"}
 Nível de segurança funcional requerido: ${nivelSeguranca || "NR-12 padrão"}
 Integração com MES/ERP: ${integracaoMes || "Não definido"}
 
