@@ -1155,6 +1155,20 @@ Estrutura: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas (MATRIZ OBRI
 
     proposal = sanitizeProposal(proposal || generateFallbackProposal({ clientName, projectTitle, initialObjective, proposalVersion, miniEscopo, producao, peca, peso, dimensoes, ambiente, automacao, processoAtual, objetivo, observacoes }, selectedAgents), fallbackInput);
 
+    // Generate AI images for <<IMAGEM:...>> placeholders
+    try {
+      proposal = await generateAndReplaceImages(
+        proposal,
+        LOVABLE_API_KEY,
+        projectTitle || "Projeto Industrial",
+        miniEscopo || ""
+      );
+    } catch (imgErr) {
+      console.error("Image generation error (non-fatal):", imgErr);
+      // Remove any remaining placeholders gracefully
+      proposal = proposal.replace(/<<IMAGEM:[^>]+>>/g, '');
+    }
+
     return new Response(JSON.stringify({ proposal }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
