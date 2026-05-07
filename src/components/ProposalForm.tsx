@@ -30,11 +30,6 @@ export interface FormData {
   clientRepCargo: string;
   validadeDias: string;
   companyName: string;
-  // Campos Categoria A — especificação v2.0
-  numCoresProducao: string;
-  tipoTinta: string;
-  nivelSeguranca: string;
-  integracaoMes: string;
 }
 
 interface ProposalFormProps {
@@ -68,11 +63,6 @@ export const emptyFormData: FormData = {
   clientRepCargo: "",
   validadeDias: "60",
   companyName: "Leve Brisa",
-  // Categoria A v2.0
-  numCoresProducao: "",
-  tipoTinta: "",
-  nivelSeguranca: "",
-  integracaoMes: "",
 };
 
 const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onClear, hasSavedContent }: ProposalFormProps) => {
@@ -253,61 +243,6 @@ const ProposalForm = ({ onGenerate, isLoading, initialData, onDraftChange, onCle
             <div className="space-y-2 md:col-span-2">
               <Label className="text-foreground font-medium">Objetivo do Projeto</Label>
               <Input placeholder="Ex: Aumentar produtividade, reduzir custos, melhorar qualidade..." value={form.objetivo} onChange={(e) => updateForm({ objetivo: e.target.value })} />
-            </div>
-          </div>
-
-          {/* Subseção B2: Parâmetros Categoria A (v2.0) */}
-          <div className="space-y-1 mb-2 mt-4">
-            <h3 className="text-sm font-heading font-semibold text-foreground uppercase tracking-wide flex items-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-amber-500" />
-              B2. Parâmetros Específicos (Categoria A)
-            </h3>
-            <p className="text-xs text-muted-foreground">Para projetos de pintura industrial e processos especiais. Ausentes geram estimativas com declaração de premissa crítica.</p>
-            <div className="h-0.5 bg-amber-500/20 rounded" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-2">
-              <Label className="text-foreground font-medium">Número de Cores em Produção</Label>
-              <Input type="number" placeholder="Ex: 4" value={form.numCoresProducao} onChange={(e) => updateForm({ numCoresProducao: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-foreground font-medium">Tipo de Tinta</Label>
-              <Select value={form.tipoTinta} onValueChange={(v) => updateForm({ tipoTinta: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Base solvente">Base solvente</SelectItem>
-                  <SelectItem value="Base água">Base água</SelectItem>
-                  <SelectItem value="Pó eletrostático">Pó eletrostático</SelectItem>
-                  <SelectItem value="E-coat">E-coat (eletrodepositão)</SelectItem>
-                  <SelectItem value="Bicomponente">Bicomponente</SelectItem>
-                  <SelectItem value="Não definido">Não definido</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-foreground font-medium">Nível de Segurança Funcional</Label>
-              <Select value={form.nivelSeguranca} onValueChange={(v) => updateForm({ nivelSeguranca: v })}>
-                <SelectTrigger><SelectValue placeholder="NR-12 padrão" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="NR-12 padrão">NR-12 padrão</SelectItem>
-                  <SelectItem value="SIL 1 (ISO 13849 PLc)">SIL 1 / PLc</SelectItem>
-                  <SelectItem value="SIL 2 (ISO 13849 PLd)">SIL 2 / PLd</SelectItem>
-                  <SelectItem value="SIL 3 (ISO 13849 PLe)">SIL 3 / PLe</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-foreground font-medium">Integração MES/ERP</Label>
-              <Select value={form.integracaoMes} onValueChange={(v) => updateForm({ integracaoMes: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Não requerida">Não requerida</SelectItem>
-                  <SelectItem value="Interface de dados (OPC-UA)">Interface de dados (OPC-UA)</SelectItem>
-                  <SelectItem value="Integração MES full">Integração MES full</SelectItem>
-                  <SelectItem value="Integração ERP + MES">Integração ERP + MES</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 

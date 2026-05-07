@@ -31,143 +31,102 @@ function classifyScope(miniEscopo: string, peso: string, producao: string, autom
   let subsistemas_obrigatorios: string[] = [];
 
   if (isPintura) {
-    tipo_projeto = "linha_pintura_industrial";
-    subsistemas_obrigatorios = [
-      "cabine_primer", "cabine_topcoat", "transportador", "estufas",
-      "robos_pintura", "paint_kitchen", "exaustao_filtragem", "automacao_controle"
-    ];
-    // Determina porte pela combinação de peso, produção e keywords
-    const isGrande = text.includes("grande porte") || text.includes("grande") || pesoNum >= 200 || producaoNum <= 25;
-    const isPequeno = text.includes("pequeno porte") || (pesoNum > 0 && pesoNum < 50 && producaoNum > 40);
-    porte = isGrande ? "grande" : isPequeno ? "pequeno" : "medio";
-  } else if (["robô", "célula", "celula", "robotizada", "usinagem", "cnc"].some(k => text.includes(k))) {
-    tipo_projeto = "celula_robotizada";
-    porte = pesoNum >= 500 ? "grande" : pesoNum >= 50 ? "medio" : "pequeno";
-  } else if (["transportador", "esteira", "agv", "paletiz"].some(k => text.includes(k))) {
-    tipo_projeto = "movimentacao_logistica";
+  if (text.includes("grande porte") || pesoNum >= 500) {
+    porte = "grande";
+  } else if (text.includes("pequeno porte") || (pesoNum > 0 && pesoNum < 50)) {
+    porte = "pequeno";
+  } else if (pesoNum >= 50) {
     porte = "medio";
   }
 
-  const isLinhaFull = isLinha && isPintura;
-  if (automacao?.includes("Totalmente") || text.includes("alta performance") || text.includes("10 robôs") || text.includes("robôs")) {
+  // Detecção genérica de tipo de projeto
+  let tipo_projeto = "automacao_industrial";
+  if (["pintura", "cabine", "estufa", "tinta", "revestimento", "primer"].some(k => text.includes(k))) {
+    tipo_projeto = "sistema_de_superficies";
+  } else if (["robô", "célula", "celula", "robotizada", "cnc", "usinagem"].some(k => text.includes(k))) {
+    tipo_projeto = "celula_robotizada";
+  } else if (["transportador", "esteira", "agv", "paletiz", "logistica"].some(k => text.includes(k))) {
+    tipo_projeto = "movimentacao_logistica";
+  } else if (["embalagem", "envase", "envazamento"].some(k => text.includes(k))) {
+    tipo_projeto = "embalagem_envase";
+  } else if (["solda", "soldagem"].some(k => text.includes(k))) {
+    tipo_projeto = "soldagem_robotizada";
+  }
+
+  // Nível de automação genérico
+  let nivel_automacao: ScopeClassification["nivel_automacao"] = "padrao";
+  if (automacao?.toLowerCase().includes("totalmente") || text.includes("alta performance")) {
     nivel_automacao = "alta_performance";
-  } else if (automacao?.includes("Semi")) {
+  } else if (automacao?.toLowerCase().includes("semi") || text.includes("semi")) {
     nivel_automacao = "manual";
   }
 
-  return { tipo_projeto, porte, nivel_automacao, is_linha_pintura_industrial: isLinhaFull, subsistemas_obrigatorios };
+  return { tipo_projeto, porte, nivel_automacao };
 }
 
 // ============================================================
-// CATEGORIA A — Campos críticos; ausência = proxy + PREMISSA CRÍTICA
+// CAMPOS CRÍTICOS UNIVERSAIS — ausência gera premissa obrigatória
+// Apenas campos relevantes para qualquer tipo de projeto
 // ============================================================
 function getMissingCategoryAFields(input: Record<string, string | undefined>): string[] {
   const missing: string[] = [];
-  if (!input.dimensoes || input.dimensoes === "") missing.push("Dimensões máximas da peça (L×W×H)");
-  if (!input.peso || input.peso === "") missing.push("Peso máximo da peça (kg)");
-  if (!input.producao || input.producao === "") missing.push("Produção horária meta (peças/hora)");
-  if (!input.numCoresProducao || input.numCoresProducao === "") missing.push("Número de cores em produção");
-  if (!input.tipoTinta || input.tipoTinta === "") missing.push("Tipo de tinta (solvente/água/pó)");
+  if (!input.dimensoes || input.dimensoes === "") missing.push("Dimensões máximas da peça/produto (L×W×H)");
+  if (!input.peso || input.peso === "") missing.push("Peso máximo da peça/produto (kg)");
+  if (!input.producao || input.producao === "") missing.push("Produção horária meta (unidades/hora)");
   return missing;
 }
 
 // ============================================================
-// REFERÊNCIA PROP-722801 — Baseline para validação de saída
+// CONTEXTO DE ESCOPO GENÉRICO — injetado no system prompt
+// Diretrizes de qualidade proporcionais ao porte detectado.
+// Sem valores hardcoded ou referências a domínio específico.
 // ============================================================
-const PROP722801_REFERENCE = {
-  capex_total: 27_200_000,
-  num_robos: 10,
-  prazo_semanas: 52,
-  payback_meses: 28,
-  vpl: 25_000_000,
-  tir_pct: 25,
-  oee_pct: 85,
-  producao_horaria: 20,
-  tempo_ciclo_s: 180,
-  itens_custo: [
-    { item: 1, desc: "Engenharia e Projeto", valor: 1_200_000, pct_min: 0.03, pct_max: 0.07 },
-    { item: 2, desc: "Cabines de Pintura (Primer e Topcoat)", valor: 3_500_000, pct_min: 0.09, pct_max: 0.18 },
-    { item: 3, desc: "Robôs de Pintura e Periféricos", valor: 4_800_000, pct_min: 0.12, pct_max: 0.24 },
-    { item: 4, desc: "Sistema de Troca de Tinta (Paint Kitchen)", valor: 2_500_000, pct_min: 0.06, pct_max: 0.14 },
-    { item: 5, desc: "Estufas de Secagem e Cura", valor: 3_000_000, pct_min: 0.08, pct_max: 0.16 },
-    { item: 6, desc: "Transportador Aéreo Power & Free", valor: 2_000_000, pct_min: 0.05, pct_max: 0.11 },
-    { item: 7, desc: "Sistema de Exaustão e Filtragem Central", valor: 1_500_000, pct_min: 0.04, pct_max: 0.09 },
-    { item: 8, desc: "Painéis de Controle e Automação", valor: 2_200_000, pct_min: 0.06, pct_max: 0.12 },
-    { item: 9, desc: "Instalação e Montagem", valor: 1_800_000, pct_min: 0.05, pct_max: 0.10 },
-    { item: 10, desc: "Comissionamento, Testes e Start-up", valor: 1_000_000, pct_min: 0.025, pct_max: 0.06 },
-    { item: 11, desc: "Treinamento", valor: 300_000, pct_min: 0.007, pct_max: 0.02 },
-    { item: 12, desc: "Documentação Técnica Final", valor: 200_000, pct_min: 0.005, pct_max: 0.015 },
-    { item: 13, desc: "Contingência (10% do subtotal)", valor: 2_400_000, pct_min: 0.08, pct_max: 0.15 },
-    { item: 14, desc: "Impostos e Encargos (~15%)", valor: 3_600_000, pct_min: 0.12, pct_max: 0.20 },
-    { item: 15, desc: "Frete e Logística", valor: 500_000, pct_min: 0.01, pct_max: 0.03 },
-  ],
-  capex_faixa_min: 22_000_000,
-  capex_faixa_max: 34_000_000,
-};
-
-function buildScopeEnhancement(scope: ScopeClassification, missingFields: string[], input: Record<string, string | undefined>): string {
-  const proxyUsado: string[] = [];
-  if (!input.producao) proxyUsado.push("Produção: assumido 20 peças/hora (proxy padrão grande porte)");
-  if (!input.peso) proxyUsado.push("Peso: assumido 500 kg/gancho (capacidade padrão do transportador)");
-  if (!input.dimensoes) proxyUsado.push("Dimensões: cabine 10m×5,5m×4m como indicativo de grande porte");
+function buildScopeEnhancement(scope: ScopeClassification, missingFields: string[]): string {
+  const porteRules: Record<string, string> = {
+    grande: `
+DIRETRIZES OBRIGATÓRIAS — PROJETO DE GRANDE PORTE:
+- Estrutura de custos: mínimo 10 itens discriminados com valores unitários
+- Cronograma: mínimo 8 fases com durações em semanas
+- ROI: obrigatório 3 cenários (conservador, base, otimista) com WACC e vida útil explícitos
+- Critérios de Aceitação: mínimo 7 KPIs quantitativos mensuráveis
+- Alternativas de investimento: mínimo 2 rotas técnicas comparadas
+- Riscos: mínimo 5 riscos identificados com plano de mitigação`,
+    medio: `
+DIRETRIZES OBRIGATÓRIAS — PROJETO DE MÉDIO PORTE:
+- Estrutura de custos: mínimo 7 itens discriminados
+- Cronograma: mínimo 5 fases com durações
+- ROI: 2 cenários (conservador e base) com premissas declaradas
+- Critérios de Aceitação: mínimo 5 KPIs quantitativos
+- Riscos: mínimo 3 riscos identificados`,
+    pequeno: `
+DIRETRIZES OBRIGATÓRIAS — PROJETO DE PEQUENO PORTE:
+- Estrutura de custos: mínimo 5 itens discriminados
+- Cronograma: fases e marcos principais
+- ROI: payback simples com premissas declaradas
+- Critérios de Aceitação: mínimo 3 KPIs`,
+  };
 
   let ctx = `\n═══════════════════════════════════════════════
-TIPAGEM DE ESCOPO (obrigatória — Fase 1 da especificação v2.0)
+CLASSIFICAÇÃO DE ESCOPO (automática)
 ═══════════════════════════════════════════════
 tipo_projeto: ${scope.tipo_projeto}
-porte: ${scope.porte}
+porte_estimado: ${scope.porte}
 nivel_automacao: ${scope.nivel_automacao}
 `;
 
-  if (scope.is_linha_pintura_industrial && scope.porte === "grande") {
-    ctx += `
-BASELINE DE REFERÊNCIA OBRIGATÓRIO (PROP-722801 — linha pintura industrial grande porte):
-- CAPEX total esperado: R$ 22M–R$ 34M (referência: R$ 27,2M)
-- Número de robôs: 8–14 (referência: 10)
-- Prazo total: 40–64 semanas (referência: 52 semanas)
-- Payback descontado: 20–40 meses (referência: 28 meses)
-- OEE meta: ≥ 85%
-- Produção horária: ≥ 20 peças/hora
-- Tempo de ciclo máximo: ≤ 180 segundos
-
-REGRAS DE VALIDAÇÃO INVIOLÁVEIS PARA ESTE ESCOPO:
-- CAP-001: CAPEX/robô NUNCA < R$ 1.500.000 (mínimo histórico R$ 1.800.000/robô)
-- CAP-004: Contingência obrigatória: 8%–20% do subtotal (padrão: 10%)
-- CAP-005: Impostos: 12%–20% do subtotal (padrão: 15%)
-- CAP-006: MÍNIMO 3 alternativas de investimento (Rota 1 = 0,6x; Rota 2 = 0,8x; Rota 3 = 1,0x)
-- CAP-007: CAPEX conservador deve ser ≤ 0,9× do otimizado
-- CRO-001: Prazo NUNCA < 32 semanas para grande porte
-- ROI-001: Payback descontado NUNCA < 12 meses (implausível)
-- ROI-002: OBRIGATÓRIO 3 cenários de ROI (conservador, base, otimista)
-- ACE-001: MÍNIMO 7 KPIs quantitativos em Critérios de Aceitação
-
-SUBSISTEMAS TÉCNICOS OBRIGATÓRIOS (todos devem aparecer no Escopo Técnico, Seção 5):
-${scope.subsistemas_obrigatorios.map(s => `- ${s}`).join("\n")}
-
-ESTRUTURA OBRIGATÓRIA DA TABELA DE CUSTOS (15 itens — NENHUM pode ser omitido):
-${PROP722801_REFERENCE.itens_custo.map(i => `  Item ${i.item}: ${i.desc} (referência: R$ ${i.valor.toLocaleString("pt-BR")})`).join("\n")}
-
-PREMISSAS DE ROI OBRIGATÓRIAS (declarar explicitamente na Seção 13):
-- WACC: 10% a.a.
-- Vida útil: 10 anos
-- Custo mão de obra: R$ 50/hora
-- Custo tinta: R$ 80/litro
-- Custo energia: R$ 0,70/kWh
-`;
-  }
+  const rules = porteRules[scope.porte];
+  if (rules) ctx += rules;
 
   if (missingFields.length > 0) {
     ctx += `
-CAMPOS CATEGORIA A AUSENTES (usar proxy + declarar em PREMISSA CRÍTICA obrigatoriamente):
-${missingFields.map(f => `- ${f}`).join("\n")}
-Proxies utilizados:
-${proxyUsado.map(p => `- ${p}`).join("\n")}
-AÇÃO OBRIGATÓRIA: Inserir callout PREMISSA CRÍTICA na Seção 2 listando esses dados ausentes, os proxies usados e o impacto estimado (±20% no CAPEX).
-`;
+
+DADOS TÉCNICOS AUSENTES — declarar como PREMISSA CRÍTICA na Seção 2:
+${missingFields.map(f => `- ${f}: não informado — usar estimativa técnica conservadora e documentar o impacto na precisão do orçamento.`).join("\n")}`;
   }
 
   return ctx;
 }
+
 
 function identifyAgents(miniEscopo: string): string {
   const text = miniEscopo.toLowerCase();
