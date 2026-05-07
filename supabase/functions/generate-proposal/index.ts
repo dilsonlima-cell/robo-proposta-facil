@@ -1115,6 +1115,7 @@ REGRAS OBRIGATÓRIAS:
 - O documento deve soar como uma proposta redigida por uma equipe humana de engenharia consultiva, com autoridade técnica e linguagem comercial premium.
 - No campo/seção Aplicação, NÃO repita o mini escopo. Faça uma análise resumida da necessidade real do cliente.
 - O documento deve ser COMPLETO — NÃO interrompa ou trunque o conteúdo. Gere TODAS as seções até o final incluindo assinaturas.
+- IMAGENS TÉCNICAS: Inclua placeholders <<IMAGEM:NOME>> em pontos estratégicos da proposta (ex: <<IMAGEM:LAYOUT_SOLUCAO>>, <<IMAGEM:FLUXO_PROCESSO>>, <<IMAGEM:ARQUITETURA_AUTOMACAO>>). Use nomes descritivos em MAIÚSCULAS com underscores. Inclua 2-4 placeholders nas seções de Escopo Técnico, Solução Recomendada e Etapas. As imagens serão geradas automaticamente.
 - NÃO inclua seções sobre "Especificações de Diagramação", "Controle Executivo do Documento", "Motor de Diagramação", "Especificações de Geração de Imagens" ou qualquer instrução de formatação no corpo da proposta.
 - Na seção de Cronograma, use uma tabela com <colgroup> e larguras fixas. Fases nas linhas e semanas/meses nas colunas, marcando células preenchidas com background colorido. Use font-size 7.5pt para Gantt.
 - Na seção de Riscos, inclua colunas: Nível (badge colorido BAIXO/MÉDIO/ALTO), Categoria, Descrição, Probabilidade, Impacto e Mitigação.
