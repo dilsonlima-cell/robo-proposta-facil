@@ -455,7 +455,13 @@ function sanitizeProposal(html: string, formInput?: Record<string, string | unde
   // 1. Remove control characters and zero-width chars
   result = result.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
   result = result.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
-  
+  // 1.b Remove mojibake artifacts comuns (UTF-8 mal decodificado) e box-drawing residual
+  result = result.replace(/[■█▪▫◆◇░▒▓]/g, '');
+  result = result.replace(/\uFFFD/g, '');
+  result = result.replace(/Â(?=[\s\xA0])/g, '');
+  // Normaliza NBSP visualmente quebrado e múltiplos espaços
+  result = result.replace(/\u00A0/g, ' ').replace(/[ \t]{3,}/g, '  ');
+
   // 2. Protect SPEC v3.0 structures (Tables & Head)
   if (result.includes('<table') && !result.includes('<thead')) {
     result = result.replace(/(<table[^>]*>)\s*(<tr>\s*<th)/gi, '$1<thead>$2');
@@ -468,8 +474,14 @@ function sanitizeProposal(html: string, formInput?: Record<string, string | unde
     .replace(/gerad[ao]s? automaticamente/gi, "elaborado")
     .replace(/inteligência artificial/gi, "engenharia consultiva")
     .replace(/\bIA\b/g, "engenharia consultiva")
-    .replace(/\bagentes?\b/gi, "especialistas")
-    .replace(/[■█]/g, ""); // Remove chart characters if they got through
+    .replace(/\bagentes?\b/gi, "especialistas");
+
+  // 3.b Remove blocos duplicados consecutivos (parágrafos, headings, tabelas idênticas)
+  result = result.replace(
+    /(<(?:p|h1|h2|h3|h4|table|ul|ol|div)[^>]*>[\s\S]{40,}?<\/(?:p|h1|h2|h3|h4|table|ul|ol|div)>)\s*\1/gi,
+    '$1'
+  );
+
 
   // 4. Fill signature placeholders with form data
   if (formInput) {
