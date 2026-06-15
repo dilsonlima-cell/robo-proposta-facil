@@ -1,6 +1,6 @@
 import React from 'react';
 
-type BadgeVariant = 'rascunho' | 'em_analise' | 'aprovado' | 'erro' | 'default';
+type BadgeVariant = 'rascunho' | 'em_analise' | 'aprovado' | 'erro' | 'default' | 'outline';
 
 interface BadgeProps {
   children: React.ReactNode;
