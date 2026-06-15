@@ -2,6 +2,14 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import { renderTemplate, TEMPLATES, type ProposalData } from "./premiumTemplates";
 
+/**
+ * Block-aware PDF export.
+ *
+ * Em vez de fatiar o canvas em alturas fixas (que corta tabelas/parágrafos no
+ * meio), nós medimos no DOM o offset vertical de cada bloco de topo
+ * (h1/h2/seções/tabelas/callouts) e usamos esses pontos como candidatos de
+ * quebra. Tabelas mais altas do que uma página são fatiadas entre linhas.
+ */
 export async function exportPremiumPDF(
   proposalContent: string,
   templateId: string,
@@ -45,83 +53,189 @@ export async function exportPremiumPDF(
 
   const fullHtml = renderTemplate(templateId, data, primaryColor, secondaryColor);
 
+  // Página A4 (mm)
+  const pageWidthMM = isLandscape ? 297 : 210;
+  const pageHeightMM = isLandscape ? 210 : 297;
+  const widthPx = Math.round(pageWidthMM * 3.7795);
+
   const wrapper = document.createElement("div");
-  wrapper.style.cssText = "position:absolute;left:0;top:0;width:0;height:0;overflow:hidden;z-index:-9999;pointer-events:none;";
+  wrapper.style.cssText =
+    "position:fixed;left:-99999px;top:0;width:0;height:0;overflow:hidden;z-index:-9999;pointer-events:none;";
   document.body.appendChild(wrapper);
 
   const container = document.createElement("div");
-  const widthMM = isLandscape ? 297 : 210;
-  const widthPx = Math.round(widthMM * 3.7795);
-  container.style.cssText = `width:${widthPx}px;background:white;font-size:16px;`;
+  container.style.cssText = `width:${widthPx}px;background:#ffffff;font-size:16px;color:#222;`;
   container.innerHTML = fullHtml;
   wrapper.appendChild(container);
 
-  await new Promise((r) => setTimeout(r, 1000));
+  // Aguarda fontes/imagens carregarem
+  try {
+    // @ts-ignore
+    if (document.fonts?.ready) await (document.fonts as any).ready;
+  } catch {}
+  await new Promise((r) => setTimeout(r, 600));
 
   try {
-    const canvas = await html2canvas(container, {
-      scale: 2,
-      backgroundColor: "#ffffff",
-      logging: false,
-      useCORS: true,
-      allowTaint: true,
-      width: widthPx,
-      windowWidth: widthPx,
-    });
-
-    const pageWidth = isLandscape ? 297 : 210;
-    const pageHeight = isLandscape ? 210 : 297;
-    const imgWidth = pageWidth;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
     const pdf = new jsPDF(isLandscape ? "l" : "p", "mm", "a4");
 
-    if (imgHeight <= pageHeight) {
-      const imgData = canvas.toDataURL("image/jpeg", 0.92);
-      pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
-    } else {
-      let yOffset = 0;
-      let pageNum = 0;
-      const srcPageHeight = (pageHeight / imgHeight) * canvas.height;
+    const coverEl = container.querySelector(".proposal-cover") as HTMLElement | null;
+    const bodyEl = container.querySelector(".proposal-body-pages") as HTMLElement | null;
 
-      while (yOffset < canvas.height) {
-        if (pageNum > 0) pdf.addPage();
+    // === 1) CAPA: uma página, preenche toda a A4 ===
+    if (coverEl) {
+      const coverCanvas = await html2canvas(coverEl, {
+        scale: 2,
+        backgroundColor: null,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        width: coverEl.offsetWidth,
+        height: coverEl.offsetHeight,
+        windowWidth: coverEl.offsetWidth,
+      });
+      const img = coverCanvas.toDataURL("image/jpeg", 0.95);
+      pdf.addImage(img, "JPEG", 0, 0, pageWidthMM, pageHeightMM);
+    }
 
-        const srcH = Math.min(srcPageHeight, canvas.height - yOffset);
+    // === 2) MIOLO: paginação por blocos ===
+    if (bodyEl) {
+      // Margens internas no PDF (mm) — o body já tem padding interno
+      const marginTopMM = 10;
+      const marginBottomMM = 14; // espaço pro rodapé
+      const usableHeightMM = pageHeightMM - marginTopMM - marginBottomMM;
 
-        const pageCanvas = document.createElement("canvas");
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = srcH;
-        const ctx = pageCanvas.getContext("2d");
-        if (ctx) {
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          ctx.drawImage(canvas, 0, yOffset, canvas.width, srcH, 0, 0, canvas.width, srcH);
-        }
+      const bodyCanvas = await html2canvas(bodyEl, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        width: bodyEl.offsetWidth,
+        height: bodyEl.offsetHeight,
+        windowWidth: bodyEl.offsetWidth,
+      });
 
-        const pageImgData = pageCanvas.toDataURL("image/jpeg", 0.92);
-        const drawHeight = (srcH * imgWidth) / canvas.width;
-        pdf.addImage(pageImgData, "JPEG", 0, 0, imgWidth, drawHeight);
+      // px do canvas por px do CSS
+      const pxRatio = bodyCanvas.height / bodyEl.offsetHeight;
+      // Altura máxima de uma página em px do canvas
+      const pageMaxCanvasPx = (usableHeightMM / pageWidthMM) * bodyCanvas.width;
 
-        yOffset += srcPageHeight;
-        pageNum++;
+      // === Coletar candidatos de quebra ===
+      const breakpoints = new Set<number>();
+      const bodyRect = bodyEl.getBoundingClientRect();
+
+      const addBreak = (cssY: number) => {
+        const y = Math.round(cssY * pxRatio);
+        if (y > 0 && y <= bodyCanvas.height) breakpoints.add(y);
+      };
+
+      // Top-level: filhos diretos do body (cada bloco/seção/parágrafo/tabela)
+      const topChildren = Array.from(bodyEl.children).filter(
+        (el) => !(el instanceof HTMLStyleElement)
+      ) as HTMLElement[];
+
+      for (const child of topChildren) {
+        const r = child.getBoundingClientRect();
+        addBreak(r.bottom - bodyRect.top);
       }
 
-      // Add page numbers (skip first page = cover)
-      const totalPages = pdf.getNumberOfPages();
-      for (let i = 2; i <= totalPages; i++) {
-        pdf.setPage(i);
+      // Sub-blocos importantes (h1/h2 marcam INÍCIO de seção -> quebra ANTES)
+      const sectionStarters = bodyEl.querySelectorAll(
+        "h1.proposal-title, h2.proposal-title, .page-break, .section-break"
+      );
+      sectionStarters.forEach((el) => {
+        const r = (el as HTMLElement).getBoundingClientRect();
+        addBreak(r.top - bodyRect.top);
+      });
+
+      // Linhas de tabela (para tabelas maiores que a página)
+      const trs = bodyEl.querySelectorAll("tbody tr");
+      trs.forEach((el) => {
+        const r = (el as HTMLElement).getBoundingClientRect();
+        addBreak(r.bottom - bodyRect.top);
+      });
+
+      // Itens de listas longas
+      const lis = bodyEl.querySelectorAll("ul > li, ol > li");
+      lis.forEach((el) => {
+        const r = (el as HTMLElement).getBoundingClientRect();
+        addBreak(r.bottom - bodyRect.top);
+      });
+
+      const sortedBreaks = Array.from(breakpoints).sort((a, b) => a - b);
+
+      // === Algoritmo greedy: maior candidato que cabe ===
+      const totalH = bodyCanvas.height;
+      let yStart = 0;
+      const slices: Array<{ start: number; end: number }> = [];
+
+      while (yStart < totalH) {
+        const limit = yStart + pageMaxCanvasPx;
+        if (limit >= totalH) {
+          slices.push({ start: yStart, end: totalH });
+          break;
+        }
+        // Maior breakpoint <= limit e > yStart
+        let chosen = -1;
+        for (const bp of sortedBreaks) {
+          if (bp > yStart && bp <= limit) chosen = bp;
+          if (bp > limit) break;
+        }
+        if (chosen <= yStart + 10) {
+          // Nenhum candidato no intervalo — força corte para evitar loop
+          chosen = Math.floor(limit);
+        }
+        slices.push({ start: yStart, end: chosen });
+        yStart = chosen;
+      }
+
+      // === Renderiza cada slice como uma página ===
+      const drawableWidthMM = pageWidthMM; // body já tem padding interno
+      for (let i = 0; i < slices.length; i++) {
+        const { start, end } = slices[i];
+        const sliceH = end - start;
+        if (sliceH <= 0) continue;
+
+        const sliceCanvas = document.createElement("canvas");
+        sliceCanvas.width = bodyCanvas.width;
+        sliceCanvas.height = sliceH;
+        const ctx = sliceCanvas.getContext("2d");
+        if (!ctx) continue;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+        ctx.drawImage(
+          bodyCanvas,
+          0,
+          start,
+          bodyCanvas.width,
+          sliceH,
+          0,
+          0,
+          bodyCanvas.width,
+          sliceH
+        );
+
+        const imgData = sliceCanvas.toDataURL("image/jpeg", 0.92);
+        const drawH = (sliceH / bodyCanvas.width) * drawableWidthMM;
+
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, marginTopMM, drawableWidthMM, drawH);
+
+        // Rodapé: número de página + doc + data
+        const pageIdx = i + 1;
+        const totalBody = slices.length;
         pdf.setFontSize(8);
-        pdf.setTextColor(150, 150, 150);
-        const pageText = `Página ${i - 1} de ${totalPages - 1}`;
-        const textWidth = pdf.getTextWidth(pageText);
-        pdf.text(pageText, pageWidth - textWidth - 10, pageHeight - 8);
-        // Add doc number on the left
-        pdf.text(`${docNumber} · ${proposalDate}`, 10, pageHeight - 8);
+        pdf.setTextColor(130, 130, 130);
+        const footerY = pageHeightMM - 6;
+        pdf.text(`${docNumber} · ${proposalDate}`, 10, footerY);
+        const pageLabel = `Página ${pageIdx} de ${totalBody}`;
+        const tw = pdf.getTextWidth(pageLabel);
+        pdf.text(pageLabel, pageWidthMM - tw - 10, footerY);
       }
     }
 
-    const fileName = `proposta_${template.name.replace(/\s/g, "_")}_${data.client.replace(/\s/g, "_")}.pdf`;
+    const safeName = (s: string) => s.replace(/[^a-zA-Z0-9_\-]+/g, "_");
+    const fileName = `proposta_${safeName(template.name)}_${safeName(data.client)}.pdf`;
     pdf.save(fileName);
   } finally {
     document.body.removeChild(wrapper);
