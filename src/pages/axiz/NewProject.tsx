@@ -4,7 +4,8 @@ import {
   Button, 
   Card, 
   Input, 
-  TopNav 
+  TopNav,
+  Badge
 } from '../../components/axiz/ui';
 import { TemplateSelector } from '../../components/axiz/TemplateSelector';
 import { useProposalStore } from '../../store/proposalStore';
