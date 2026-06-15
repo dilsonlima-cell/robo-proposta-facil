@@ -1079,20 +1079,12 @@ REGRAS ALGORÍTMICAS
 ═══════════════════════════════════════════════
 FORMATO DE SAÍDA (JSON OBRIGATÓRIO)
 ═══════════════════════════════════════════════
-{
-  "resumo_executivo": { ... },
-  "alternativas": { ... },
-  "analise_tecnica": { ... },
-  "bom": { ... },
-  "roi": { ... },
-  "dossie_html": "HTML PURO sem markdown. Use as classes: proposal-title (H1), proposal-subtitle (H2), proposal-text, proposal-table, callout (com cores), signature-block, footer-meta."
-}`;
-- Dados do representante da empresa proponente: Nome: ${representanteName || 'A ser designado'}, Cargo: ${representanteCargo || 'A ser designado'}.
-- Dados do representante do cliente: Nome: ${clientRepName || 'A ser designado'}, Cargo: ${clientRepCargo || 'A ser designado'}.
-- Empresa proponente: ${companyName || 'Leve Brisa'}. Validade: ${validadeDias || '60'} dias.
-- Data de emissão (usar em TODOS os lugares): ${new Date().toLocaleDateString("pt-BR")}.
+Dados do representante da empresa proponente: Nome: ${representanteName || 'A ser designado'}, Cargo: ${representanteCargo || 'A ser designado'}.
+Dados do representante do cliente: Nome: ${clientRepName || 'A ser designado'}, Cargo: ${clientRepCargo || 'A ser designado'}.
+Empresa proponente: ${companyName || 'Leve Brisa'}. Validade: ${validadeDias || '60'} dias.
+Data de emissão (usar em TODOS os lugares): ${new Date().toLocaleDateString("pt-BR")}.
 
-FORMATO OBRIGATÓRIO: Retorne EXCLUSIVAMENTE um objeto JSON (sem markdown, sem blocos \`\`\`json) com a seguinte estrutura:
+Retorne EXCLUSIVAMENTE um objeto JSON (sem markdown, sem blocos \`\`\`json) com a seguinte estrutura:
 {
   "resumo_executivo": {
     "investimento_resumo": "R$ ...",
@@ -1111,8 +1103,8 @@ FORMATO OBRIGATÓRIO: Retorne EXCLUSIVAMENTE um objeto JSON (sem markdown, sem b
   },
   "analise_tecnica": {
     "descricao_solucao": "Descrição técnica detalhada da solução",
-    "normas_aplicaveis": ["NR-12", "ISO 12100", ...],
-    "tecnologias_utilizadas": ["CLP Siemens", "Robótica KUKA", ...]
+    "normas_aplicaveis": ["NR-12", "ISO 12100"],
+    "tecnologias_utilizadas": ["CLP Siemens", "Robótica KUKA"]
   },
   "bom": {
     "itens": [{"descricao": "Item 1", "quantidade": 1, "preco_unitario": 0, "total": 0}],
@@ -1121,10 +1113,18 @@ FORMATO OBRIGATÓRIO: Retorne EXCLUSIVAMENTE um objeto JSON (sem markdown, sem b
   "roi": {
     "cenarios": [{"nome": "Conservador", "capex": 0, "beneficio_anual": 0, "payback_meses": 0, "premissas": "..."}]
   },
-  "dossie_html": "O DOCUMENTO COMPLETO FORMATADO PARA A4 (conforme as 15 seções solicitadas, incluindo placeholders <<IMAGEM:NAME>> e tabelas Gantt/Riscos/ROI em HTML puro)."
+  "dossie_html": "O DOCUMENTO COMPLETO FORMATADO PARA A4 (incluindo as 15 seções solicitadas, placeholders <<IMAGEM:NAME>> e tabelas Gantt/Riscos/ROI em HTML puro)."
 }
 
-Importante: O campo 'dossie_html' deve conter toda a proposta textual rica, formatada com as classes CSS solicitadas (proposal-title, highlight-box, etc.). No campo 'dossie_html', NÃO use markdown, use apenas tags HTML. Estrutura do HTML: 1 Apresentação, 2 Contexto e Premissas, 3 Alternativas (MATRIZ), 4 Solução Recomendada, 5 Escopo Técnico, 6 Etapas, 7 Recursos, 8 Custos, 9 Prazo/Cronograma, 10 Riscos (MATRIZ), 11 Critérios de Aceitação, 12 Dados a Confirmar, 13 ROI, 14 Fechamento, 15 Assinaturas.`;
+REGRAS DE DIAGRAMAÇÃO OBRIGATÓRIAS:
+- NÃO repita blocos de texto, seções ou tabelas. Cada seção aparece UMA única vez.
+- Numeração de seções é sequencial e única (não duplique "15." ou outras).
+- Unifique ROI/VPL/TIR em UMA seção única (ex.: "13. ANÁLISE DE RETORNO FINANCEIRO").
+- Use SEMPRE tabelas <table> com <thead> para cronogramas (Gantt). PROIBIDO texto com barras "S1 S2".
+- Todos os valores monetários explícitos (sem "R$ 0,00" ou "___"). Se desconhecido, use "a definir".
+- HTML PURO (sem markdown, sem blocos \`\`\`).
+- Estrutura: 1 Apresentação · 2 Contexto e Premissas · 3 Alternativas (matriz) · 4 Solução Recomendada · 5 Escopo Técnico · 6 Etapas · 7 Recursos · 8 Custos · 9 Prazo/Cronograma · 10 Riscos · 11 Critérios de Aceitação · 12 Dados a Confirmar · 13 ROI/VPL/TIR · 14 Fechamento · 15 Assinaturas.`;
+
 
     const requestBody = {
       model: "google/gemini-2.5-flash",
