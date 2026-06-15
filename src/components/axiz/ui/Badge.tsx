@@ -1,6 +1,6 @@
 import React from 'react';
 
-type BadgeVariant = 'rascunho' | 'em_analise' | 'aprovado' | 'erro' | 'default';
+type BadgeVariant = 'rascunho' | 'em_analise' | 'aprovado' | 'erro' | 'default' | 'outline';
 
 interface BadgeProps {
   children: React.ReactNode;
@@ -19,6 +19,7 @@ export const Badge = ({
     aprovado: 'bg-success/20 text-success border-success/30',
     erro: 'bg-error/20 text-error border-error/30',
     default: 'bg-surface-variant text-on-surface-variant border-outline',
+    outline: 'bg-transparent text-on-surface border-outline',
   };
 
   return (

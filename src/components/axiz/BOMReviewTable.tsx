@@ -139,7 +139,7 @@ export const BOMReviewTable: React.FC<Props> = ({ data, onApprove, isLoading, wa
           </p>
         </div>
         <Button 
-          variant="outline" 
+          variant="ghost" 
           onClick={() => window.location.href = '/axiz/novo-projeto'}
           leftIcon={<AlertCircle size={18} />}
         >
