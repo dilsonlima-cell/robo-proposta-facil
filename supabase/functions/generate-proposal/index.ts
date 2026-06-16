@@ -1222,7 +1222,8 @@ REGRAS DE DIAGRAMAÇÃO OBRIGATÓRIAS:
     const integrityWarnings = validateProposalIntegrity(proposalData.dossie_html || "");
 
     return new Response(JSON.stringify({ 
-      proposal: proposalData,
+      proposal: proposalData.dossie_html || "",
+      metadata: proposalData,
       warnings: integrityWarnings
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
