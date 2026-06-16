@@ -36,20 +36,24 @@ export interface ProposalData {
   clientRepCargo?: string;
 }
 
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+function escapeHtml(str: unknown): string {
+  if (str === null || str === undefined) return '';
+  const s = typeof str === 'string' ? str : String(str);
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function sanitizeText(text: string): string {
-  if (!text) return '';
-  text = text.normalize('NFC');
+function sanitizeText(text: unknown): string {
+  if (text === null || text === undefined) return '';
+  let t = typeof text === 'string' ? text : String(text);
+  if (!t) return '';
+  t = t.normalize('NFC');
   // Remove control characters except \n \r \t
-  text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
+  t = t.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, '');
   // Remove zero-width chars
-  text = text.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
+  t = t.replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
   // Remove leftover placeholders like [Something]
-  text = text.replace(/\[(?:Nome|Cargo|Data|CREA|CPF|CNPJ)[^\]]*\]/gi, 'A ser designado');
-  return text;
+  t = t.replace(/\[(?:Nome|Cargo|Data|CREA|CPF|CNPJ)[^\]]*\]/gi, 'A ser designado');
+  return t;
 }
 
 function buildContentPages(content: string, primaryColor: string, secondaryColor: string, data: ProposalData): string {
