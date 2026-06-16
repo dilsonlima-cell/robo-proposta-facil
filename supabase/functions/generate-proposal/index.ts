@@ -1152,18 +1152,48 @@ REGRAS DE DIAGRAMAÇÃO OBRIGATÓRIAS:
       proposal += continuation;
     }
 
-    // Parse JSON
-    let proposalData;
-    try {
-      // Remove possible markdown block wraps if AI ignored instructions
-      const jsonStr = proposal.replace(/```json|```/g, '').trim();
-      proposalData = JSON.parse(jsonStr);
-    } catch (parseErr) {
-      console.error("JSON Parse Error:", parseErr);
-      // Fallback: If not JSON, wrap the raw response as dossie_html
+    // Parse JSON (robust)
+    let proposalData: any = null;
+    const tryParse = (s: string) => { try { return JSON.parse(s); } catch { return null; } };
+    const sanitizeJsonString = (raw: string): string => {
+      // Strip code fences
+      let s = raw.replace(/```json|```/gi, '').trim();
+      // Extract from first { to last }
+      const a = s.indexOf('{'); const b = s.lastIndexOf('}');
+      if (a !== -1 && b > a) s = s.slice(a, b + 1);
+      // Escape raw control chars inside string literals only
+      let out = ''; let inStr = false; let esc = false;
+      for (let i = 0; i < s.length; i++) {
+        const ch = s[i]; const code = s.charCodeAt(i);
+        if (inStr) {
+          if (esc) { out += ch; esc = false; continue; }
+          if (ch === '\\') { out += ch; esc = true; continue; }
+          if (ch === '"') { out += ch; inStr = false; continue; }
+          if (code === 0x0A) { out += '\\n'; continue; }
+          if (code === 0x0D) { out += '\\r'; continue; }
+          if (code === 0x09) { out += '\\t'; continue; }
+          if (code < 0x20) { out += ' '; continue; }
+          out += ch;
+        } else {
+          if (ch === '"') { inStr = true; out += ch; continue; }
+          out += ch;
+        }
+      }
+      return out;
+    };
+
+    proposalData = tryParse(proposal) || tryParse(sanitizeJsonString(proposal));
+
+    if (!proposalData) {
+      console.error("JSON Parse failed; extracting dossie_html via regex fallback");
+      // Extract dossie_html field directly from possibly broken JSON
+      const m = proposal.match(/"dossie_html"\s*:\s*"([\s\S]*?)"\s*(?:,\s*"[a-z_]+"\s*:|}\s*$)/);
+      let html = m ? m[1] : proposal;
+      // Unescape JSON escapes
+      html = html.replace(/\\n/g, '\n').replace(/\\r/g, '').replace(/\\t/g, '  ').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
       proposalData = {
-        dossie_html: proposal,
-        resumo_executivo: { contexto: "Ocorreu um erro na estruturação dos dados, mas o dossiê completo foi gerado." }
+        dossie_html: html,
+        resumo_executivo: { contexto: "Proposta gerada em modo de recuperação devido a problema de formatação JSON. O conteúdo do dossiê foi preservado." }
       };
     }
 
