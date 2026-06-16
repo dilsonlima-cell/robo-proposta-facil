@@ -77,8 +77,9 @@ const ProposalResult = ({ content, formData, onContentChange }: ProposalResultPr
     input.click();
   };
 
-  const processContent = (html: string) => {
-    return html.replace(
+  const processContent = (html: unknown) => {
+    const str = typeof html === 'string' ? html : (html == null ? '' : String(html));
+    return str.replace(
       /<<IMAGEM:([^>]+)>>/g,
       (_, name) =>
         `<div data-image-block="${name}" class="image-block-wrapper"><div class="image-placeholder" data-name="${name}"><span class="image-placeholder-icon">🖼</span><span>Clique para inserir imagem: ${name}</span></div></div>`
