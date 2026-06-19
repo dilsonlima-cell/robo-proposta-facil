@@ -1018,6 +1018,22 @@ SEÇÃO DE ASSINATURAS (sempre incluir ao final):
 NÃO use markdown (**, ##, etc). Use HTML puro com as classes acima.
 Insira <div class="page-break"></div> entre cada seção principal para diagramação A4 correta.
 
+REGRA ABSOLUTA ANTI-ALUCINAÇÃO (INVIOLÁVEL):
+Você NÃO PODE inventar, estimar, ou inferir NENHUM dos seguintes dados se eles não estiverem explicitamente presentes no formulário do usuário:
+- Valores de CAPEX, OPEX, investimento, custos, preços de equipamentos
+- Horas de engenharia, horas de mão de obra, taxas horárias
+- Prazos em semanas ou dias para fases específicas
+- Modelos, marcas ou fabricantes de equipamentos (ex: "CLP Siemens S7-1500")
+- Métricas quantitativas de OEE, Cpk, MTBF, tempo de ciclo
+- Qualquer número que o usuário não forneceu
+
+Quando um dado necessário NÃO foi fornecido pelo usuário, SEMPRE use uma das formas abaixo:
+- "A DEFINIR COM O CLIENTE"
+- "A CONFIRMAR EM LEVANTAMENTO TÉCNICO"
+- "Dependente de especificação técnica a validar"
+
+A ausência declarada é profissional. O valor inventado é incompetência.
+
 REGRAS FINAIS (SPEC v3.0 NEUTRA):
 - Linguagem técnica + comercial premium, em português brasileiro.
 - Independência de segmento: o motor gera para QUALQUER indústria.
@@ -1069,52 +1085,38 @@ REGRAS DE LAYOUT E DIAGRAMAÇÃO (SPEC v3.0)
 6. METADADOS: Rodapé em todas as seções: "Proposta Axiz v3.0 • Doc ${Math.random().toString(36).substr(2, 9).toUpperCase()} • ${new Date().toLocaleDateString("pt-BR")} • Página X de Y".
 
 ═══════════════════════════════════════════════
+REGRA ABSOLUTA ANTI-ALUCINAÇÃO
+═══════════════════════════════════════════════
+- NUNCA invente valores de CAPEX, custos, horas de engenharia, prazos, modelos de equipamentos ou métricas quantitativas (OEE, Cpk, MTBF) que não foram fornecidos pelo usuário.
+- Se o dado não está no formulário: escreva "A DEFINIR COM O CLIENTE" ou "A CONFIRMAR EM LEVANTAMENTO TÉCNICO".
+- Valores monetários no BOM: SOMENTE se o usuário informou. Caso contrário: "A definir".
+- A ausência declarada é profissional. O valor inventado destrói a credibilidade da proposta.
+
+═══════════════════════════════════════════════
 REGRAS ALGORÍTMICAS
 ═══════════════════════════════════════════════
-- CAPEX: Use referências industriais realistas.
-- CONTINGÊNCIA: Aplique 5-20% sobre o SUBTOTAL TÉCNICO, nunca sobre o total com impostos.
-- SOFTWARE: Mínimo 40h de engenharia por equipamento principal.
+- CAPEX: Use EXCLUSIVAMENTE valores fornecidos pelo usuário no formulário. Se não fornecidos, escreva "A DEFINIR COM O CLIENTE" — nunca estime, nunca chute, nunca use "referências de mercado". Valores inventados são mais prejudiciais do que valores ausentes declarados.
+- CONTINGÊNCIA: Aplique 5-20% sobre o SUBTOTAL TÉCNICO, nunca sobre o total com impostos. Use contingência SOMENTE se o CAPEX base for informado pelo usuário.
+- SOFTWARE E ENGENHARIA: Declare horas de engenharia somente se informadas pelo usuário. Se não informadas, escreva "A DEFINIR APÓS DETALHAMENTO TÉCNICO".
 - SEGURANÇA: NR-12 e ISO 12100 são mandatórios em qualquer projeto de máquina.
 
 ═══════════════════════════════════════════════
-FORMATO DE SAÍDA (JSON OBRIGATÓRIO)
+FORMATO DE SAÍDA (DOIS BLOCOS SEPARADOS)
 ═══════════════════════════════════════════════
 Dados do representante da empresa proponente: Nome: ${representanteName || 'A ser designado'}, Cargo: ${representanteCargo || 'A ser designado'}.
 Dados do representante do cliente: Nome: ${clientRepName || 'A ser designado'}, Cargo: ${clientRepCargo || 'A ser designado'}.
 Empresa proponente: ${companyName || 'Leve Brisa'}. Validade: ${validadeDias || '60'} dias.
 Data de emissão (usar em TODOS os lugares): ${new Date().toLocaleDateString("pt-BR")}.
 
-Retorne EXCLUSIVAMENTE um objeto JSON (sem markdown, sem blocos \`\`\`json) com a seguinte estrutura:
-{
-  "resumo_executivo": {
-    "investimento_resumo": "R$ ...",
-    "prazo_resumo": "... dias",
-    "contexto": "Breve descrição do contexto operacional",
-    "diagnostico_tecnico": {
-      "causa_raiz": "Descrição da causa raiz",
-      "descricao": "Parecer técnico detalhado",
-      "impactos": [{"descricao": "Impacto X", "gravidade": "Alta|Média|Baixa"}]
-    }
-  },
-  "alternativas": {
-    "basica": { "posicionamento": "Conservadora", "descricao": "...", "investimento": "R$ ...", "prazo": "...", "pros": ["Vantagem 1", "Vantagem 2"] },
-    "intermediaria": { "posicionamento": "Performance", "descricao": "...", "investimento": "R$ ...", "prazo": "...", "pros": ["Vantagem 1", "Vantagem 2"] },
-    "premium": { "posicionamento": "Indústria 4.0", "descricao": "...", "investimento": "R$ ...", "prazo": "...", "pros": ["Vantagem 1", "Vantagem 2"] }
-  },
-  "analise_tecnica": {
-    "descricao_solucao": "Descrição técnica detalhada da solução",
-    "normas_aplicaveis": ["NR-12", "ISO 12100"],
-    "tecnologias_utilizadas": ["CLP Siemens", "Robótica KUKA"]
-  },
-  "bom": {
-    "itens": [{"descricao": "Item 1", "quantidade": 1, "preco_unitario": 0, "total": 0}],
-    "resumo_consolidado": { "preco_total_final": 0 }
-  },
-  "roi": {
-    "cenarios": [{"nome": "Conservador", "capex": 0, "beneficio_anual": 0, "payback_meses": 0, "premissas": "..."}]
-  },
-  "dossie_html": "O DOCUMENTO COMPLETO FORMATADO PARA A4 (incluindo as 15 seções solicitadas, placeholders <<IMAGEM:NAME>> e tabelas Gantt/Riscos/ROI em HTML puro)."
-}
+IMPORTANTE: Retorne EXATAMENTE neste formato, com os dois delimitadores abaixo:
+
+===HTML_START===
+[O DOCUMENTO HTML COMPLETO AQUI — HTML puro, sem markdown, sem blocos \`\`\`, com todas as 15 seções, placeholders <<IMAGEM:NAME>>, tabelas de Gantt/Riscos/ROI]
+===HTML_END===
+
+===META_START===
+{"resumo_executivo":{"investimento_resumo":"A DEFINIR COM O CLIENTE","prazo_resumo":"A DEFINIR","contexto":"[breve contexto]","diagnostico_tecnico":{"causa_raiz":"[causa raiz]","descricao":"[parecer técnico]","impactos":[{"descricao":"[impacto]","gravidade":"Alta"}]}},"alternativas":{"basica":{"posicionamento":"Conservadora","descricao":"[desc]","investimento":"A DEFINIR","prazo":"A DEFINIR","pros":["[pro1]"]},"intermediaria":{"posicionamento":"Performance","descricao":"[desc]","investimento":"A DEFINIR","prazo":"A DEFINIR","pros":["[pro1]"]},"premium":{"posicionamento":"Avançada","descricao":"[desc]","investimento":"A DEFINIR","prazo":"A DEFINIR","pros":["[pro1]"]}},"analise_tecnica":{"descricao_solucao":"[desc]","normas_aplicaveis":["NR-12","ISO 12100"],"tecnologias_utilizadas":["[tech1]"]},"roi":{"cenarios":[{"nome":"Base","capex":"A DEFINIR","beneficio_anual":"A DEFINIR","payback_meses":"A DEFINIR","premissas":"[premissas]"}]}}
+===META_END===
 
 REGRAS DE DIAGRAMAÇÃO OBRIGATÓRIAS:
 - NÃO repita blocos de texto, seções ou tabelas. Cada seção aparece UMA única vez.
@@ -1126,13 +1128,24 @@ REGRAS DE DIAGRAMAÇÃO OBRIGATÓRIAS:
 - Estrutura: 1 Apresentação · 2 Contexto e Premissas · 3 Alternativas (matriz) · 4 Solução Recomendada · 5 Escopo Técnico · 6 Etapas · 7 Recursos · 8 Custos · 9 Prazo/Cronograma · 10 Riscos · 11 Critérios de Aceitação · 12 Dados a Confirmar · 13 ROI/VPL/TIR · 14 Fechamento · 15 Assinaturas.`;
 
 
+    // CIRURGIA 1 (17/06/2026): systemPrompt era construído mas nunca enviado —
+    // o requestBody usava compactSystemPrompt, perdendo toda a lógica de
+    // agentes especializados, porte e versão. Corrigido: usamos systemPrompt
+    // como system e compactSystemPrompt como bloco de regras de layout
+    // injetado no início do userPrompt, para que o modelo receba ambos.
+    const fullUserPrompt = `${compactSystemPrompt}
+
+${scopeEnhancement}
+
+${userPrompt}`;
+
     const requestBody = {
       model: "google/gemini-2.5-flash",
       temperature: 0.2,
       max_tokens: initialObjective === "Gerar Escopo Técnico" ? 9000 : proposalVersion === "Completa" ? 28000 : proposalVersion === "Basica" ? 10000 : 20000,
       messages: [
-        { role: "system", content: compactSystemPrompt },
-        { role: "user", content: userPrompt },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: fullUserPrompt },
       ],
     };
 
@@ -1144,57 +1157,81 @@ REGRAS DE DIAGRAMAÇÃO OBRIGATÓRIAS:
         temperature: 0.15,
         max_tokens: 9000,
         messages: [
-          { role: "system", content: compactSystemPrompt },
+          { role: "system", content: systemPrompt },
           { role: "assistant", content: proposal.slice(-8000) },
-          { role: "user", content: "Continue exatamente do ponto em que parou, sem repetir seções já escritas, e obrigatoriamente finalize até o bloco signature-block." },
+          { role: "user", content: "Continue exatamente do ponto em que parou dentro do bloco HTML (após ===HTML_START===), sem repetir seções já escritas. Obrigatoriamente finalize o documento com o bloco de assinaturas (signature-block), depois feche com ===HTML_END=== e inclua o bloco ===META_START=== ... ===META_END=== com os metadados JSON." },
         ],
       });
       proposal += continuation;
     }
 
-    // Parse JSON (robust)
+    // CIRURGIA 3 (17/06/2026): parser robusto de dois blocos delimitados.
+    // Antes: o modelo retornava HTML serializado dentro de um campo JSON —
+    // qualquer aspas/barra/newline no HTML quebrava o JSON, ativando um
+    // regex de recuperação frágil. Agora: HTML e metadados vêm em blocos
+    // separados por delimitadores seguros (===HTML_START=== etc).
     let proposalData: any = null;
-    const tryParse = (s: string) => { try { return JSON.parse(s); } catch { return null; } };
-    const sanitizeJsonString = (raw: string): string => {
-      // Strip code fences
-      let s = raw.replace(/```json|```/gi, '').trim();
-      // Extract from first { to last }
-      const a = s.indexOf('{'); const b = s.lastIndexOf('}');
-      if (a !== -1 && b > a) s = s.slice(a, b + 1);
-      // Escape raw control chars inside string literals only
-      let out = ''; let inStr = false; let esc = false;
-      for (let i = 0; i < s.length; i++) {
-        const ch = s[i]; const code = s.charCodeAt(i);
-        if (inStr) {
-          if (esc) { out += ch; esc = false; continue; }
-          if (ch === '\\') { out += ch; esc = true; continue; }
-          if (ch === '"') { out += ch; inStr = false; continue; }
-          if (code === 0x0A) { out += '\\n'; continue; }
-          if (code === 0x0D) { out += '\\r'; continue; }
-          if (code === 0x09) { out += '\\t'; continue; }
-          if (code < 0x20) { out += ' '; continue; }
-          out += ch;
-        } else {
-          if (ch === '"') { inStr = true; out += ch; continue; }
-          out += ch;
-        }
-      }
-      return out;
+
+    const extractBlock = (raw: string, startTag: string, endTag: string): string => {
+      const start = raw.indexOf(startTag);
+      const end = raw.indexOf(endTag);
+      if (start === -1 || end === -1 || end <= start) return "";
+      return raw.slice(start + startTag.length, end).trim();
     };
 
-    proposalData = tryParse(proposal) || tryParse(sanitizeJsonString(proposal));
+    const htmlBlock = extractBlock(proposal, "===HTML_START===", "===HTML_END===");
+    const metaBlock = extractBlock(proposal, "===META_START===", "===META_END===");
 
-    if (!proposalData) {
-      console.error("JSON Parse failed; extracting dossie_html via regex fallback");
-      // Extract dossie_html field directly from possibly broken JSON
-      const m = proposal.match(/"dossie_html"\s*:\s*"([\s\S]*?)"\s*(?:,\s*"[a-z_]+"\s*:|}\s*$)/);
-      let html = m ? m[1] : proposal;
-      // Unescape JSON escapes
-      html = html.replace(/\\n/g, '\n').replace(/\\r/g, '').replace(/\\t/g, '  ').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-      proposalData = {
-        dossie_html: html,
-        resumo_executivo: { contexto: "Proposta gerada em modo de recuperação devido a problema de formatação JSON. O conteúdo do dossiê foi preservado." }
+    if (htmlBlock) {
+      // Novo caminho: blocos delimitados encontrados — parse limpo
+      let parsedMeta: any = {};
+      if (metaBlock) {
+        try { parsedMeta = JSON.parse(metaBlock); } catch {
+          console.error("Meta JSON parse failed (non-fatal); using empty meta.");
+        }
+      }
+      proposalData = { ...parsedMeta, dossie_html: htmlBlock };
+    } else {
+      // Fallback legado: tenta o formato JSON antigo (para compatibilidade
+      // com respostas geradas antes desta atualização ou em caso de falha)
+      console.warn("Delimitadores não encontrados; tentando parse JSON legado.");
+      const tryParse = (s: string) => { try { return JSON.parse(s); } catch { return null; } };
+      const sanitizeJsonString = (raw: string): string => {
+        let s = raw.replace(/```json|```/gi, '').trim();
+        const a = s.indexOf('{'); const b = s.lastIndexOf('}');
+        if (a !== -1 && b > a) s = s.slice(a, b + 1);
+        let out = ''; let inStr = false; let esc = false;
+        for (let i = 0; i < s.length; i++) {
+          const ch = s[i]; const code = s.charCodeAt(i);
+          if (inStr) {
+            if (esc) { out += ch; esc = false; continue; }
+            if (ch === '\\') { out += ch; esc = true; continue; }
+            if (ch === '"') { out += ch; inStr = false; continue; }
+            if (code === 0x0A) { out += '\\n'; continue; }
+            if (code === 0x0D) { out += '\\r'; continue; }
+            if (code === 0x09) { out += '\\t'; continue; }
+            if (code < 0x20) { out += ' '; continue; }
+            out += ch;
+          } else {
+            if (ch === '"') { inStr = true; out += ch; continue; }
+            out += ch;
+          }
+        }
+        return out;
       };
+
+      proposalData = tryParse(proposal) || tryParse(sanitizeJsonString(proposal));
+
+      if (!proposalData) {
+        console.error("JSON Parse failed; extracting dossie_html via regex fallback");
+        const m = proposal.match(/"dossie_html"\s*:\s*"([\s\S]*?)"\s*(?:,\s*"[a-z_]+"\s*:|}\s*$)/);
+        let html = m ? m[1] : proposal;
+        html = html.replace(/\\n/g, '\n').replace(/\\r/g, '').replace(/\\t/g, '  ').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+        proposalData = {
+          dossie_html: html,
+          resumo_executivo: { contexto: "Proposta gerada em modo de recuperação." }
+        };
+      }
     }
 
     if (proposalData.dossie_html) {
