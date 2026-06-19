@@ -1127,7 +1127,8 @@ REGRAS DE DIAGRAMAÇÃO OBRIGATÓRIAS:
 - NÃO repita blocos de texto, seções ou tabelas. Cada seção aparece UMA única vez.
 - Numeração de seções é sequencial e única (não duplique "15." ou outras).
 - Unifique ROI/VPL/TIR em UMA seção única (ex.: "13. ANÁLISE DE RETORNO FINANCEIRO").
-- Use SEMPRE tabelas <table> com <thead> para cronogramas (Gantt). PROIBIDO texto com barras "S1 S2".
+- GANTT CHART: Quando a seção de cronograma tiver fases definidas, gere o Gantt visual DIRETAMENTE em HTML usando <table class="gantt-table"> com células coloridas via estilo inline. NÃO use <<IMAGEM:CRONOGRAMA>> para cronograma — gere o HTML do Gantt diretamente. Exemplo de célula ativa: <td style="background:#1E40AF;border-radius:4px;width:30px;">&nbsp;</td>. Célula inativa: <td style="background:#e5e7eb;border-radius:4px;width:30px;">&nbsp;</td>. Colunas: Fase | Responsável | S1 | S2 | S3 | ... (semanas como colunas individuais).
+- Use APENAS <<IMAGEM:NOME>> para ilustrações técnicas reais (layout, fluxo de processo, célula robotizada). NUNCA para cronogramas.
 - Todos os valores monetários explícitos (sem "R$ 0,00" ou "___"). Se desconhecido, use "a definir".
 - HTML PURO (sem markdown, sem blocos \`\`\`).
 - Estrutura: 1 Apresentação · 2 Contexto e Premissas · 3 Alternativas (matriz) · 4 Solução Recomendada · 5 Escopo Técnico · 6 Etapas · 7 Recursos · 8 Custos · 9 Prazo/Cronograma · 10 Riscos · 11 Critérios de Aceitação · 12 Dados a Confirmar · 13 ROI/VPL/TIR · 14 Fechamento · 15 Assinaturas.`;
