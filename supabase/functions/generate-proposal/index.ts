@@ -797,7 +797,7 @@ serve(async (req) => {
     const missingCatA = getMissingCategoryAFields(fallbackInput);
     const scopeEnhancement = buildScopeEnhancement(scopeClass, missingCatA);
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    const LOVABLE_API_KEY = Deno.env.get("GEMINI_API_KEY") || Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ proposal: sanitizeProposal(generateFallbackProposal(fallbackInput, selectedAgents), fallbackInput), warning: "A proposta foi elaborada com base nas premissas disponíveis. Recomenda-se revisar os dados técnicos antes do envio ao cliente." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
