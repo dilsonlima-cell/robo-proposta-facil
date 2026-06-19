@@ -548,21 +548,26 @@ async function readStreamingCompletion(response: Response): Promise<string> {
   return output;
 }
 
-async function callAiGateway(LOVABLE_API_KEY: string, body: Record<string, unknown>): Promise<string> {
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+async function callAiGateway(GEMINI_API_KEY: string, body: Record<string, unknown>): Promise<string> {
+  // Direct Google Gemini API via OpenAI-compatible endpoint
+  const normalizedBody = { ...body, stream: true } as Record<string, unknown>;
+  if (typeof normalizedBody.model === "string") {
+    normalizedBody.model = (normalizedBody.model as string).replace(/^google\//, "");
+  }
+  const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
+      Authorization: `Bearer ${GEMINI_API_KEY}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ ...body, stream: true }),
+    body: JSON.stringify(normalizedBody),
   });
 
   if (!response.ok) {
     if (response.status === 429) throw new Error("Limite de requisições excedido. Tente novamente em alguns minutos.");
-    if (response.status === 402) throw new Error("Créditos esgotados. Adicione créditos em Settings > Workspace > Usage.");
+    if (response.status === 402 || response.status === 402) throw new Error("Créditos esgotados na conta Gemini.");
     const t = await response.text();
-    console.error("AI error:", response.status, t);
+    console.error("Gemini API error:", response.status, t);
     throw new Error("Erro ao elaborar a proposta.");
   }
 
